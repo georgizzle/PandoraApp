@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Imgur top</title>
+    <!--<script src="/static/aggregator/js/scripts.min.js"></script>-->
+    <!--<link href="/static/aggregator/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+    // jQuery methods go here...
+    $.ajax( "categories" )
+    .done(function(data) {
+    console.log(data);
+    if (data.length == 0) {
+     $('#main_content').append('<p>The are no data (Yet)</p>');
+    } else {
+     $('#main_content').append('<p>' + data[0].name + '</p>');
+     $('#main_content').append('<img src="media/'+ data[0].img + '"/>');
+     $('#main_content').append('<div>' + data[0].desc + '</div>');
+    }
+    })
+    });
+    </script>
+</head>
+<body>
+<h1>Categories</h1>
+<div id="main_content"></div>
+</body>
+</html>
