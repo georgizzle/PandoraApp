@@ -1,36 +1,52 @@
 from django.db import models
 from tinymce import models as tinymce_models
 
+default_img='pictures/Erevos_world_map.png'
 # Create your models here.
 class Category(models.Model):
     name     = models.CharField(max_length=30)  # The name of the category
-    desc     = tinymce_models.HTMLField(null=True) # The description of the category
+    desc     = tinymce_models.HTMLField(blank=True, null=True) # The description of the category
     cr_date  = models.DateTimeField(auto_now_add=True) # Time and date of creation, defaults to current time
-    img      = models.ImageField(upload_to='pictures/category/%Y/%m/%d/') # The link for the image thumbnail
+    img      = models.ImageField(upload_to='pictures/category/%Y/%m/%d/', default=default_img) # The link for the image thumbnail
+
+    def __str__(self):
+        return 'Category: ' + self.name
 
 class Location(models.Model):
     name      = models.CharField(max_length=30)
-    type      = models.CharField(max_length=30)
-    entity    = models.CharField(max_length=30)
-    latitude  = models.DecimalField(max_digits=5, decimal_places=2)
-    longitude = models.DecimalField(max_digits=5, decimal_places=2)
-    altitude  = models.DecimalField(max_digits=10, decimal_places=2)
+    type      = models.CharField(max_length=30, blank=True, null=True) # type of location
+    desc      = tinymce_models.HTMLField(blank=True, null=True) # description - additional info
+    latitude  = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    altitude  = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     final     = models.BooleanField(default=False)
+
+    def __str__(self):
+        ret_str = 'Location: ' + self.name
+        return ret_str + ' -- reviewed' if self.final else ret_str + ' -- not reviewed'
 
 class Kingdom(models.Model):
     name       = models.CharField(max_length=30)  # The name of the category
-    desc       = tinymce_models.HTMLField(null=True) # The description of the category
-    history    = tinymce_models.HTMLField(null=True)
-    geography  = models.ForeignKey(Location, null=True)
-    other_info = models.TextField(null=True)
+    desc       = tinymce_models.HTMLField(blank=True, null=True) # The description of the category
+    history    = tinymce_models.HTMLField(blank=True, null=True)
+    geography  = models.ForeignKey(Location, blank=True, null=True)
+    other_info = tinymce_models.HTMLField(blank=True, null=True)
     final      = models.BooleanField(default=False)
-    img        = models.ImageField(upload_to='pictures/kingdoms/%Y/%m/%d/')
+    img        = models.ImageField(upload_to='pictures/kingdoms/%Y/%m/%d/', default=default_img)
+
+    def __str__(self):
+        ret_str = 'Kingdom: ' + self.name
+        return ret_str + ' -- reviewed' if self.final else ret_str + ' -- not reviewed'
 
 class MajorEvent(models.Model):
     name      = models.CharField(max_length=30)
-    type      = models.CharField(max_length=30)
+    type      = models.CharField(max_length=30, null=True)
     desc      = tinymce_models.HTMLField(null=True)
     history   = tinymce_models.HTMLField(null=True)
     kingdom   = models.ForeignKey(Kingdom)
     final     = models.BooleanField(default=False)
-    img       = models.ImageField(upload_to='pictures/majorevents/%Y/%m/%d/')
+    img       = models.ImageField(upload_to='pictures/majorevents/%Y/%m/%d/', default=default_img)
+
+    def __str__(self):
+        ret_str = 'Major Event: ' + self.name
+        return ret_str + ' -- reviewed' if self.final else ret_str + ' -- not reviewed'

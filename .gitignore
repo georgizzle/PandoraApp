@@ -49,3 +49,5 @@ Temporary Items
 .idea
 media
 cosmos/migrations
+cosmos/static/cosmos/node_modules
+cosmos/static/cosmos/texture.jpg
