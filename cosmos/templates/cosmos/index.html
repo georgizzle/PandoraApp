@@ -5,7 +5,6 @@
     <title>Cosmos</title>
     <link rel="stylesheet" type="text/css" href="/static/cosmos/css/main.css" />
     <link rel="stylesheet" type="text/css" href="/static/cosmos/node_modules/bootstrap/dist/css/bootstrap.min.css" />
-	<script src = "/static/cosmos/js/scripts.min.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
@@ -18,49 +17,11 @@
 </nav>
 <div class="card-deck" id="main-content">
 </div>
-<div id="ModalLoginForm" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title text-xs-center">Log in like a Boss</h4>
-            </div>
-            <div class="modal-body">
-                <form role="form" method="POST" action="">
-                    <input type="hidden" name="_token" value="">
-                    <div class="form-group">
-                        <label class="control-label">E-Mail Address</label>
-                        <div>
-                            <input type="email" class="form-control input-lg" name="email" value="">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">Password</label>
-                        <div>
-                            <input type="password" class="form-control input-lg" name="password">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div>
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" name="remember"> Remember Me
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div>
-                            <a class="btn btn-link" href="">Forgot Your Password?</a>
-                            <button type="submit" class="btn btn-info btn-block">Login</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer text-xs-center">
-                Don't have an account? <a href="/auth/register">Sign up »</a>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+<select class="form-control">
+    <option v-for="federation in federations" v-bind:value="federation.name">
+    {{ federation.name }}
+    </option>
+</select>
+<script src = "/static/cosmos/js/scripts.min.js"></script>
 </body>
 </html>

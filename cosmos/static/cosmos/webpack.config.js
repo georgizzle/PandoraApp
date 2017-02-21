@@ -14,4 +14,9 @@ module.exports = {
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false }),
   ],
+  resolve: {
+  alias: {
+    'vue$': 'vue/dist/vue.common.js'
+  }
+}
 };

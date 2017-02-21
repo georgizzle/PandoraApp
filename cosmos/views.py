@@ -1,18 +1,17 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from .mySerializer import MySerialiser
-from .models import Category, Kingdom, Location, MajorEvent
+from rest_framework import generics
+from .models import Category
+from .serializers import CategorySerializer
 
 
-def get_categories(request):
+class CategoryList(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
-    categories = Category.objects.all()
 
-    serializer = MySerialiser()
-    data = serializer.serialize(categories)
-
-    return JsonResponse(data, safe=False)
-
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 def index(request):
     return render(request, 'cosmos/index.html')
