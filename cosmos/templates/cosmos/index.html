@@ -3,25 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Cosmos</title>
-    <link rel="stylesheet" type="text/css" href="/static/cosmos/css/main.css" />
     <link rel="stylesheet" type="text/css" href="/static/cosmos/node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="https://npmcdn.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <a class="navbar-brand" href="#">Cosmos</a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-  </div>
-</nav>
-<div class="card-deck" id="main-content">
-</div>
-<select class="form-control">
-    <option v-for="federation in federations" v-bind:value="federation.name">
-    {{ federation.name }}
-    </option>
-</select>
-<script src = "/static/cosmos/js/scripts.min.js"></script>
+<div id="app"></div>
+<script src = "/static/cosmos/js/client.min.js"></script>
 </body>
 </html>
