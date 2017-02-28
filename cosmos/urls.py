@@ -28,6 +28,10 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^api/categories$', views.CategoryList.as_view()),
     url(r'^api/categories/(?P<pk>[0-9]+)/$', views.CategoryDetail.as_view()),
+    url(r'^api/kingdoms$', views.KingdomList.as_view()),
+    url(r'^api/kingdoms/(?P<pk>[0-9]+)/$', views.KingdomDetail.as_view()),
+    url(r'^api/majorevents$', views.MajorEventList.as_view()),
+    url(r'^api/majorevents/(?P<pk>[0-9]+)/$', views.MajorEventDetail.as_view()),
     url(r'^api/', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
