@@ -3,64 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Cosmos</title>
+    <link rel="stylesheet" type="text/css" href="/static/cosmos/node_modules/bootstrap/dist/css/bootswatch.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/cosmos/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="/static/cosmos/node_modules/bootstrap/dist/css/bootstrap.min.css" />
 	<script src = "/static/cosmos/js/scripts.min.js"></script>
 </head>
 <body>
-<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <a class="navbar-brand" href="#">Cosmos</a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-  </div>
-</nav>
-<div class="card-deck" id="main-content">
+<nav class="navbar navbar-toggleable-md navbar-inverse bg-primary">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#/home">Cosmos</a>
+
+    <div class="collapse navbar-collapse" id="navbarColor01">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#/kingdoms">Kingdoms</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#/majorevents">Major Events</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+      </ul>
+    <form class="form-inline">
+        <input type="text" class="form-control mr-sm-2" name="username" placeholder="Username">
+        <input type="text" class="form-control mr-sm-2" name="password" placeholder="Password">
+        <button type="submit" class="btn btn-secondary my-2 my-sm-0">Sign In</button>
+     </form>
+    </div>
+ </nav>
+<div class="card-group" id="main-content">
 </div>
-<div id="ModalLoginForm" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title text-xs-center">Log in like a Boss</h4>
-            </div>
-            <div class="modal-body">
-                <form role="form" method="POST" action="">
-                    <input type="hidden" name="_token" value="">
-                    <div class="form-group">
-                        <label class="control-label">E-Mail Address</label>
-                        <div>
-                            <input type="email" class="form-control input-lg" name="email" value="">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">Password</label>
-                        <div>
-                            <input type="password" class="form-control input-lg" name="password">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div>
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" name="remember"> Remember Me
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div>
-                            <a class="btn btn-link" href="">Forgot Your Password?</a>
-                            <button type="submit" class="btn btn-info btn-block">Login</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer text-xs-center">
-                Don't have an account? <a href="/auth/register">Sign up »</a>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 </body>
 </html>
