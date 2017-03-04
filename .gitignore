@@ -50,4 +50,5 @@ Temporary Items
 media
 cosmos/migrations
 cosmos/static/cosmos/node_modules
-cosmos/static/cosmos/texture.jpg
+cosmos/__pycache__
+PandoraApp/__pycache__

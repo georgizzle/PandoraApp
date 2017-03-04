@@ -16,6 +16,7 @@ require.context(
 require('tinymce/plugins/paste/plugin')
 require('tinymce/plugins/link/plugin')
 require('tinymce/plugins/autoresize/plugin')
+require('tinymce/plugins/image/plugin')
 // to include js masonry again:
 //var jQueryBridget = require('jquery-bridget');
 //var Masonry = require('masonry-layout');
@@ -25,6 +26,12 @@ require('tinymce/plugins/autoresize/plugin')
 var TIMEOUT = 30000;
 
 $(document).ready(function(){
+
+
+    $('img').on('click', function() {
+        $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
+        $('#enlargeImageModal').modal('show');
+    });
 
     var categories = {"kingdoms" : {
                                      "fields" : [ "name", "description", "history", {"geography":["id", "type", "description"]}, "other_info"]
@@ -91,7 +98,7 @@ $(document).ready(function(){
                             var name_attr = item.name.replace(" ", "-").toLowerCase();
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                  <img class="card-img-top img-fluid" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
+                                  <img class="card-img-top img-responsive" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
                                   <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
                                     <p class="card-text">' + item.description + '</p>\
@@ -119,7 +126,7 @@ $(document).ready(function(){
                                     if (item.final) {
                                         $('#main-content').append('\
                                             <div class="card" style="width: 20rem;">\
-                                              <img class="card-img-top img-fluid" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
+                                              <img class="card-img-top img-responsive" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
                                               <div class="card-block">\
                                                 <h4 class="card-title">' + item.name + '</h4>\
                                                 <p class="card-text">' + item.description + '</p>\
@@ -164,7 +171,7 @@ $(document).ready(function(){
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                  <img class="card-img-top img-fluid" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
+                                  <img class="card-img-top img-responsive" src="media/'+ safe_get(item.img) + '" alt="Card image cap">\
                             </div>');
 
                             categories[category]["fields"].forEach(function(field) {
@@ -259,7 +266,12 @@ $(document).ready(function(){
                     tinymce.remove();
                     tinymce.init({
                         selector: ".textarea-field",
-                        theme: "modern"
+                        theme: "modern",
+                        plugins: ['paste', 'link', 'autoresize', 'image'],
+                        image_list: [
+                            {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
+                            {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
+                        ]
                     })
             });
         };
@@ -307,7 +319,7 @@ $(document).ready(function(){
                                 '<div class="form-group">\
                                     <label for="'+ key +'">Upload Image</label>\
                                     <input type="file" class="form-control-file" id="'+ key +'" aria-describedby="fileHelp">\
-                                    <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replace("-", " ") +'\' cards</small>\
+                                    <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replace("-", " ") +'\' summary</small>\
                                 </div>'
                             )
                         }
@@ -316,9 +328,28 @@ $(document).ready(function(){
                 });
                     tinymce.remove();
                     tinymce.init({
-                        selector: ".textarea-field",
-                        theme: "modern"
-                    })
+                    selector: ".textarea-field",
+                    theme: "modern",
+                    plugins: ['paste', 'link', 'autoresize', 'image'],
+                    image_list: [
+                        {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
+                        {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
+                    ]
+                })
+            });
+
+            //get details to prepopulate form elements
+            $.ajax( 'api/' + category_url + '/' + id )
+                        .done(function(item) {
+                            Object.keys(item).forEach(function(key,index) {
+                                if($("#" + key).length != 0) {
+                                    if ($("#" + key).is("textarea")) {
+                                        tinymce.get(key).setContent(item[key]);
+                                    } else if ($("#" + key).is('input:text')) {
+                                        $("#" + key).val(item[key])
+                                    }
+                                }
+                            });
             });
         };
 
@@ -334,8 +365,6 @@ $(document).ready(function(){
             window.clearTimeout(id); // will do nothing if no timeout with id is present
         }
     }
-
-
 
 });
 
