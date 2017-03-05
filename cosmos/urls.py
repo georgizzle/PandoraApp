@@ -33,5 +33,6 @@ urlpatterns = [
     url(r'^api/majorevents$', views.MajorEventList.as_view()),
     url(r'^api/majorevents/(?P<pk>[0-9]+)/$', views.MajorEventDetail.as_view()),
     url(r'^api/', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api/rest-auth/', include('rest_auth.urls')),
+    url(r'^api/rest-auth/registration/', include('rest_auth.registration.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

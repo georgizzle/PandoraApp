@@ -38,9 +38,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cosmos.apps.CosmosConfig',
     'rest_framework',
+    'rest_framework.authtoken',
     'tinymce',
-    'reversion'
+    'reversion',
+    'rest_auth',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -120,6 +128,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 }
 
 # Internationalization
@@ -152,3 +164,10 @@ MEDIA_URL = '/media/'
 TINYMCE_DEFAULT_CONFIG = {
     'theme': "advanced"
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+#Auth stuff
+
+OLD_PASSWORD_FIELD_ENABLED = True
+

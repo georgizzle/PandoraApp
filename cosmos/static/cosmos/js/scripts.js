@@ -24,13 +24,83 @@ require('tinymce/plugins/image/plugin')
 //jQueryBridget( 'masonry', Masonry, $ );
 
 var TIMEOUT = 30000;
+var SITE_URL = "http://localhost:8000/cosmos";
 
 $(document).ready(function(){
 
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $('body').on('click', '#login-show', function() {
+        $('#LoginModal').modal('show');
+    });
+
+    $('body').on('click', '#reg-show', function() {
+        $('#LoginModal').modal('hide');
+        $('#RegModal').modal('show');
+    });
+
+    $('body').on('click', '#change_pass_link', function(e) {
+        e.preventDefault();
+        $('#ChangePassModal').modal('show');
+    });
+
+    $('body').on('click', '#reset_pass_link', function(e) {
+        e.preventDefault();
+        $('#LoginModal').modal('hide');
+        $('#ResetPassModal').modal('show');
+    });
 
     $('body').on('click', 'img', function() {
         $('.enlargeImageModalSource').attr('src', $(this).attr('src'));
         $('#enlargeImageModal').modal('show');
+    });
+
+    $('body').on('click', '#login_btn', function() {
+        $('.alert').remove();
+        doLogin();
+    });
+
+    $('body').on('click', '#reg_btn', function() {
+        $('.alert').remove();
+        doRegister();
+    });
+
+    $('body').on('click', '#change_pass_btn', function() {
+        $('.alert').remove();
+        doChangePassword();
+    });
+
+    $('body').on('click', '#reset_pass_btn', function() {
+        $('.alert').remove();
+        doResetPassword();
     });
 
     var categories = {"kingdoms" : {
@@ -47,6 +117,14 @@ $(document).ready(function(){
 
     crossroads.addRoute("home",function(){
         goHome();
+    });
+
+    crossroads.addRoute("account/signout",function(){
+        signOut();
+    });
+
+    crossroads.addRoute("account/register",function(){
+        goRegistration();
     });
 
     crossroads.addRoute("{category}",function(category){
@@ -87,6 +165,7 @@ $(document).ready(function(){
     goHome()
 
     function goHome() {
+        $('#message').empty();
         clearTimeouts()
         $.ajax( 'api/categories' )
             .done(function(data) {
@@ -116,6 +195,7 @@ $(document).ready(function(){
 
 
     function goCategory(category) {
+                    $('#message').empty();
                     clearTimeouts()
                     var category_url = category.replace("-", "");
                     $.ajax('api/' + category_url)
@@ -160,6 +240,7 @@ $(document).ready(function(){
 
 
     function goDetail(category, id) {
+            $('#message').empty();
             clearTimeouts()
             var category_url = category.replace("-", "");
             $.ajax( 'api/' + category_url + '/' + id )
@@ -215,6 +296,7 @@ $(document).ready(function(){
 
 
     function goAddDetail(category) {
+        $('#message').empty();
         clearTimeouts()
         var category_url = category.replace("-", "");
         $.ajax({ url : 'api/' + category_url ,
@@ -280,12 +362,13 @@ $(document).ready(function(){
                         ]
                     })
             });
-            $('body').on('click', '#add_detail_btn' , function(e) { e.preventDefault(); doAddDetail(category)})
+            $('body').off().on('click', '#add_detail_btn' , function(e) { e.preventDefault(); doAddDetail(category)})
         };
 
 
     function goEditDetail(category, id) {
-        clearTimeouts()
+        $('#message').empty();
+        clearTimeouts();
         var category_url = category.replace("-", "");
         $.ajax({ url : 'api/' + category_url ,
                   method: 'OPTIONS'
@@ -368,17 +451,23 @@ $(document).ready(function(){
             });
 
 
-            $('body').on('click', '#edit_detail_btn' , function(e) { e.preventDefault(); doEditDetail(category, id, original_item)})
+            $('body').off().on('click', '#edit_detail_btn' , function(e) { 
+                e.preventDefault();
+                doEditDetail(category, id, original_item);
+            })
         };
 
 
     function doAddDetail (category) {
+        $('#message').empty();
         var category_url = category.replace("-", "");
         if (!window.FormData) {
             alert('Your browser does not support AJAX multipart form submissions');
             return;
         }
+
         tinymce.triggerSave()
+
         $.ajax({
            
             url: 'api/' + category_url,
@@ -409,35 +498,45 @@ $(document).ready(function(){
                 }
                 return myXhr;
             },
-        }).fail(function(jqXHR, textStatus) {
-                $('#main-content > .card').prepend ('\
+        }).fail(function(response) {
+                $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + textStatus +'\
+                    <strong>Request failed: </strong>' + response +'\
                 </div>')
         })
           .done(function() {
-                $('#main-content > .card').prepend ('\
-                    <div class="alert alert-dismissible alert-success">\
+                $('#message').append('\
+                    <div class="alert alert-dismissible alert-success" id="alert_success_edit">\
                         <button type="button" class="close" data-dismiss="alert">&times;</button>\
                         '+ to_singular(category.replace("-", " ")) + ' was added successfully!\
                     </div>')
             })
+
+            //go to the top of the page
+            $("html, body").animate({ scrollTop: 0 }, 'slow');
     }
 
     
     function doEditDetail (category, id, item) {
+        $('#message').empty();
         var category_url = category.replace("-", "");
         if (!window.FormData) {
             alert('Your browser does not support AJAX multipart form submissions');
             return;
         }
 
+        tinymce.triggerSave()
+
         var formData = new FormData($('#' + category + '_edit_form')[0])
 
         var formDataPatch = findFormChangedValues(item, formData);
 
-        tinymce.triggerSave()
+        // // If no file is selected, don't remove the old one
+        // if ($('#img').get(0).files.length === 0) {
+        //     formDataPatch.delete('img')
+        // }
+        
         $.ajax({
            
             url: 'api/' + category_url + '/' + id + '/',
@@ -468,25 +567,151 @@ $(document).ready(function(){
                 }
                 return myXhr;
             },
-        }).fail(function(jqXHR, textStatus) {
-                $('#main-content > .card').prepend ('\
+        }).fail(function(response) {
+                $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + textStatus +'\
+                    <strong>Request failed: </strong>' + response +'\
                 </div>')
         })
           .done(function() {
-                $('#main-content > .card').prepend ('\
+                $('#message').append('\
                     <div class="alert alert-dismissible alert-success">\
                         <button type="button" class="close" data-dismiss="alert">&times;</button>\
                         '+ to_singular(category.replace("-", " ")) + ' was updated successfully!\
                     </div>')
             })
+
+            //go to the top of the page
+            $("html, body").animate({ scrollTop: 0 }, 'slow');
+    }
+
+
+    function doLogin() {
+       $('#message').empty();
+       data = $('#login_form').serialize();
+       username = $('#username_input').val();
+       $.ajax({
+            url: 'api/rest-auth/login/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-login').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#login-show').remove();
+                $('#LoginModal').modal('hide');
+                $('#navbarColor01').append('<a class="dropdown-toggle navbar-brand" data-toggle="dropdown" href="#">' + username +'</a>\
+                                            <ul class="dropdown-menu dropdown-menu-right">\
+                                            <li><a class="nav-link" id ="signout_link" href="#/account/signout">Sign out</a></li>\
+                                            <li><a class="nav-link" id ="change_pass_link" href="#">Change Password</a></li>\
+                                            </ul>');
+            })     
+    };
+
+
+    function doRegister() {
+       var data = $('#reg_form').serialize();
+       var email = $('#reg_email_input').val();
+       $.ajax({
+            url: 'api/rest-auth/registration/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-reg').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#RegModal').modal('hide');
+                $('#message').append('\
+                <div class="alert alert-dismissible alert-success">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    A confirmation email has been sent to <strong>'+ email +'</strong>\
+                </div>')
+            })     
+    };
+
+
+    function doChangePassword() {
+       var data = $('#change_pass_form').serialize();
+       $.ajax({
+            url: 'api/rest-auth/password/change/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-change-pass').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#ChangePassModal').modal('hide');
+                $('#message').append('\
+                <div class="alert alert-dismissible alert-success">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    Your password has been changed!\
+                </div>')
+            })     
+    };
+
+    function doResetPassword() {
+       var email = $('#res_pass_email_input').val();
+       var data = $('#reset_pass_form').serialize();
+       $.ajax({
+            url: 'api/rest-auth/password/reset/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-reset-pass').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#ResetPassModal').modal('hide');
+                $('#DoResetPassModal').modal('show');
+                $('#modal-body-do-reset-pass').prepend('\
+                <div class="alert alert-dismissible alert-success">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    An email has been sent to <strong>'+ email +'</strong>\
+                </div>')
+            })     
+    };
+
+
+    function signOut() {
+        $('#message').empty();
+        $.ajax({
+            url: 'api/rest-auth/logout/',
+            type: 'POST',
+        }).fail(function(response) {
+                $('#message').append('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                window.location.replace(SITE_URL)
+            }) 
     }
 
     function findFormChangedValues(item, formData) {
         Object.keys(item).forEach(function(key,index) {
-                                if (formData.get(key) === item[key]) {
+                                 if (formData.get(key) === item[key]) {
                                     formData.delete(key);
                                 }
                             });
@@ -514,36 +739,6 @@ $(document).ready(function(){
             window.clearTimeout(id); // will do nothing if no timeout with id is present
         }
     }
-
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    var csrftoken = getCookie('csrftoken');
-
-    function csrfSafeMethod(method) {
-        // these HTTP methods do not require CSRF protection
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });
 
 });
 

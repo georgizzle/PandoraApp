@@ -13,7 +13,7 @@
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="#/home">Cosmos</a>
+    <a class="navbar-brand" href="#/home">Erevos</a>
 
     <div class="collapse navbar-collapse" id="navbarColor01">
       <ul class="navbar-nav mr-auto">
@@ -24,13 +24,11 @@
           <a class="nav-link" href="#/major-events">Major Events</a>
         </li>
       </ul>
-    <form class="form-inline">
-        <input type="text" class="form-control mr-sm-2" name="username" placeholder="Username">
-        <input type="text" class="form-control mr-sm-2" name="password" placeholder="Password">
-        <button type="submit" class="btn btn-secondary my-2 my-sm-0">Sign In</button>
-     </form>
+    <button type="button" id ="login-show" class="btn btn-secondary my-2 my-sm-0">Log In / Join</button>
     </div>
  </nav>
+<div id="message">
+</div>
 <div class="card-deck" id="main-content">
 </div>
 <!--modal for images-->
@@ -45,6 +43,118 @@
         </div>
       </div>
     </div>
+</div>
+<!--modal for sign in-->
+<div class="modal" id ="LoginModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sign In</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-login">
+        <form name="login_form" id="login_form">
+            <p><input type="text" class="form-control mr-sm-2" name="username" id="username_input" placeholder="Username"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="password" id="password_input"placeholder="Password"></p>
+            <p><button type="button" id ="login_btn" class="btn btn-success">Sign in</button></p>
+            <p><a id ="reset_pass_link" href="#">Forgot Password? Click here to reset </a></p>
+        </form>
+      </div>
+      <div class="modal-footer"><span>Not registered yet?</span><button class="btn btn-secondary" id="reg-show">Sign Up</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--modal for sign up-->
+<div class="modal" id ="RegModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sign Up</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-reg">
+        <form name="signup_form" id="reg_form">
+            <p><input type="text" class="form-control mr-sm-2" name="username" id="reg_username_input" placeholder="Username"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="password1" id="reg_password_input1" placeholder="Password"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="password2" id="reg_password_input2" placeholder="Retype Password"></p>
+            <p><input type="email" class="form-control mr-sm-2" name="email" id="reg_email_input" placeholder="Email"></p>
+            <p><button type="button" id ="reg_btn" class="btn btn-success">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--modal for changing pass-->
+<div class="modal" id ="ChangePassModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-change-pass">
+        <form name="signup_form" id="change_pass_form">
+            <p><input type="password" class="form-control mr-sm-2" name="old_password" id="ch_pass_old_input" placeholder="Old password"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="new_password1" id="ch_pass_new1_input" placeholder="New password"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="new_password2" id="ch_pass_new2_input" placeholder="Retype New Password"></p>
+            <p><button type="button" id ="change_pass_btn" class="btn btn-success">Change Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--modal for sending email resetting pass-->
+<div class="modal" id ="ResetPassModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reset Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-reset-pass">
+        <form name="signup_form" id="reset_pass_form">
+           <p>Enter your email to get the token and uid in order to reset your password</p>
+            <p><input type="email" class="form-control mr-sm-2" name="email" id="res_pass_email_input" placeholder="Email"></p>
+            <p><button type="button" id ="reset_pass_btn" class="btn btn-success">Send Email</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--modal for reseting pass-->
+<div class="modal" id ="DoResetPassModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reset Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-do-reset-pass">
+        <form name="signup_form" id="do_reset_pass_form">
+            <p><input type="text" class="form-control mr-sm-2" name="uid" id="do_res_pass_uid_input" placeholder="UId"></p>
+            <p><input type="text" class="form-control mr-sm-2" name="token" id="do_res_pass_token_input" placeholder="Token"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="new_password1" id="do_res_pass_pass1_input" placeholder="New Password"></p>
+            <p><input type="password" class="form-control mr-sm-2" name="new_password2" id="do_res_pass_pass2_input" placeholder="Retype New Password"></p>
+            <p><button type="button" id ="do_change_pass_btn" class="btn btn-success">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>
