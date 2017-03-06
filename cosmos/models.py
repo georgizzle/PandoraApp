@@ -1,5 +1,7 @@
 from django.db import models
 from tinymce import models as tinymce_models
+import reversion
+
 # from django.db.models.signals import post_save
 # from django.dispatch import receiver
 # from rest_framework.authtoken.models import Token
@@ -22,6 +24,7 @@ class Category(models.Model):
     def __str__(self):
         return 'Category: ' + self.name
 
+@reversion.register()
 class Location(models.Model):
     name      = models.CharField(max_length=30)
     type      = models.CharField(max_length=30, blank=True, null=True) # type of location
@@ -35,6 +38,7 @@ class Location(models.Model):
         ret_str = 'Location: ' + self.name
         return ret_str + ' -- reviewed' if self.final else ret_str + ' -- not reviewed'
 
+@reversion.register()
 class Kingdom(models.Model):
     name       = models.CharField(max_length=30)  # The name of the category
     description = tinymce_models.HTMLField(blank=True, null=True) # The description of the category
@@ -43,6 +47,7 @@ class Kingdom(models.Model):
     other_info = tinymce_models.HTMLField(blank=True, null=True)
     final      = models.BooleanField(default=False)
     img        = models.ImageField(upload_to='pictures/kingdoms/%Y/%m/%d/', default=default_img)
+
 
     def __str__(self):
         ret_str = 'Kingdom: ' + self.name

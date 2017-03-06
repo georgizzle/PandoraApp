@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from .models import Category
 from .serializers import CategorySerializer
 from .models import Kingdom
@@ -8,9 +8,27 @@ from .models import Location
 from .serializers import LocationSerializer
 from .models import MajorEvent
 from .serializers import MajorEventSerializer
+from .serializers import UserSerializer
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import permissions
 
-from django.views.generic.base import TemplateResponseMixin, TemplateView, View
 
+@api_view(['GET',])
+@permission_classes((permissions.AllowAny,))
+def current_user(request):
+
+    serializer = None
+    if request.user.is_authenticated():
+        serializer = UserSerializer(request.user, context={'request': request})
+
+    return Response(serializer.data)
+
+# ViewSets define the view behavior.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -18,8 +36,10 @@ class CategoryList(generics.ListCreateAPIView):
 
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
 
 
 class KingdomList(generics.ListCreateAPIView):
@@ -28,6 +48,7 @@ class KingdomList(generics.ListCreateAPIView):
 
 
 class KingdomDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Kingdom.objects.all()
     serializer_class = KingdomSerializer
 
@@ -48,6 +69,7 @@ class MajorEventList(generics.ListCreateAPIView):
 
 
 class MajorEventDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = MajorEvent.objects.all()
     serializer_class = MajorEventSerializer
 

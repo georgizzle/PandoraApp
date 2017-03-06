@@ -17,14 +17,14 @@ require('tinymce/plugins/paste/plugin')
 require('tinymce/plugins/link/plugin')
 require('tinymce/plugins/autoresize/plugin')
 require('tinymce/plugins/image/plugin')
-// to include js masonry again:
-//var jQueryBridget = require('jquery-bridget');
-//var Masonry = require('masonry-layout');
-// make Masonry a jQuery plugin
-//jQueryBridget( 'masonry', Masonry, $ );
+
 
 var TIMEOUT = 30000;
 var SITE_URL = "http://localhost:8000/cosmos";
+var DEFAULT_PIC = "pictures/Erevos_world_map.png";
+var MODERATOR_GROUP = "Moderators"
+var current_user = null;
+
 
 $(document).ready(function(){
 
@@ -57,6 +57,26 @@ $(document).ready(function(){
             }
         }
     });
+
+    function getCurrentUser() {
+        $.ajax({
+            url: 'api/currentuser',
+            type: 'GET'
+        }).fail(function(response) {
+            console.log('Couldn\'t obtain current user\'s info');
+            return null;
+        })
+          .done(function(user) {
+                current_user = user;
+                $('#login-show').remove();
+                $('#navbarColor01').append('<a class="dropdown-toggle navbar-brand" data-toggle="dropdown" href="#">' + current_user.username +'</a>\
+                        <ul class="dropdown-menu dropdown-menu-right">\
+                        <li><a class="nav-link" id ="signout_link" href="#/account/signout">Sign out</a></li>\
+                        <li><a class="nav-link" id ="change_pass_link" href="#">Change Password</a></li>\
+                        </ul>');
+            })   
+    };
+    
 
     $('body').on('click', '#login-show', function() {
         $('#LoginModal').modal('show');
@@ -163,7 +183,9 @@ $(document).ready(function(){
         if (curHash == '') {
             // redirect to "home" hash without keeping the empty hash on the history
             hasher.replaceHash('home');
-        }
+        } else {
+            crossroads.parse(curHash);
+       }
     }
 
     hasher.initialized.add(onHasherInit);
@@ -171,12 +193,12 @@ $(document).ready(function(){
     hasher.changed.add(parseHash); //parse hash changes
     hasher.init(); //start listening for history change
 
-
-    goHome()
-
     function goHome() {
         $('#message').empty();
         clearTimeouts()
+        if (current_user == null) {
+            getCurrentUser()
+        }
         $.ajax( 'api/categories' )
             .done(function(data) {
             $('#main-content').empty();
@@ -231,8 +253,18 @@ $(document).ready(function(){
                         })
 
                     }
-                    //todo AUTH
-                    if (true){
+
+                    var canAdd = null;
+
+                    if (current_user != null) {
+                        current_user.groups.forEach(function(item){ 
+                            if (item.name == MODERATOR_GROUP) { 
+                                canAdd = true; 
+                            }
+                        });
+                    }
+                    
+                    if (canAdd){
                         $('#main-content').append('<div class="card" style="width: 20rem;">\
                                 <div class="card-block">\
                                     <a href="#/'+ category +'/add" id= "' + category + '_add">\
@@ -286,8 +318,18 @@ $(document).ready(function(){
                                         });
                                 }
                             });
-                            //todo AUTH
-                            if (true){
+
+                            var canEdit = null;
+
+                            if (current_user != null) {
+                                current_user.groups.forEach(function(item){ 
+                                    if (item.name == MODERATOR_GROUP) { 
+                                        canEdit = true; 
+                                    }
+                                });
+                            }
+                                    
+                            if (canEdit) {
                                 $('#main-content > .card').append('\
                                         <a href="#/'+ category +'/'+ item.id +'/edit" class="item-detail_edit" id= "' + category + '_' + item.id +'_edit">\
                                             <div class="card-footer">\
@@ -314,65 +356,77 @@ $(document).ready(function(){
             })
             .done(function(data) {
 
-                var attributes = data.actions.POST
-
                 $('#main-content').empty();
 
-                $('#main-content').append('\
-                        <div class="card" style="width: 20em;">\
-                        </div>');
+                if (data.hasOwnProperty('actions')) {
 
-                $('#main-content > .card').append('<form id="' + category + '_add_form" enctype="multipart/form-data">\
-                                                        <fieldset></fieldset>\
-                                                        <button type="button"\
-                                                        id="add_detail_btn"\
-                                                        class="btn btn-primary"\
-                                                        >Add ' + to_singular(category) +'</button>\
-                                                        <form>')
+                    var attributes = data.actions.POST
 
-                Object.keys(attributes).forEach(function(key,index) {
+                    $('#main-content').append('\
+                            <div class="card" style="width: 20em;">\
+                            </div>');
 
-                    if (attributes[key]['required'] == true ) {
+                    $('#main-content > .card').append('<form id="' + category + '_add_form" enctype="multipart/form-data">\
+                                                            <fieldset></fieldset>\
+                                                            <button type="button"\
+                                                            id="add_detail_btn"\
+                                                            class="btn btn-primary btn-block"\
+                                                            >Add ' + to_singular(category) +'</button>\
+                                                            <form>')
 
-                        if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
-                            $('#' + category + '_add_form > fieldset').append(
-                            '<div class="form-group">\
-                              <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
-                              <input type="text" class="form-control" name= "'+ key +'" id="'+ key +'" maxlength="'+ attributes[key]['max_length'] +'">\
-                            </div>'
-                            )
-                        } else if (attributes[key]['type'] == 'string') {
-                            $('#' + category + '_add_form > fieldset').append(
+                    Object.keys(attributes).forEach(function(key,index) {
+
+                        if (true ) {
+
+                            if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
+                                $('#' + category + '_add_form > fieldset').append(
                                 '<div class="form-group">\
-                                    <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
-                                    <textarea class="form-control textarea-field" name= "'+ key +'"  id="'+ key +'"></textarea>\
+                                <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
+                                <input type="text" class="form-control" name= "'+ key +'" id="'+ key +'" maxlength="'+ attributes[key]['max_length'] +'">\
                                 </div>'
-                            )
+                                )
+                            } else if (attributes[key]['type'] == 'string') {
+                                $('#' + category + '_add_form > fieldset').append(
+                                    '<div class="form-group">\
+                                        <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
+                                        <textarea class="form-control textarea-field" name= "'+ key +'"  id="'+ key +'"></textarea>\
+                                    </div>'
+                                )
 
-                        } else if (attributes[key]['type'] == 'image upload') {
-                            $('#' + category + '_add_form > fieldset').append(
-                                '<div class="form-group">\
-                                    <label for="'+ key +'">Upload Image</label>\
-                                    <input type="file" class="form-control-file"  name= "'+ key +'" id="'+ key +'" aria-describedby="fileHelp">\
-                                    <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replace("-", " ") +'\' cards</small>\
-                                </div>'
-                            )
+                            } else if (attributes[key]['type'] == 'image upload') {
+                                $('#' + category + '_add_form > fieldset').append(
+                                    '<div class="form-group">\
+                                        <label for="'+ key +'">Upload Image</label>\
+                                        <input type="file" class="form-control-file"  name= "'+ key +'" id="'+ key +'" aria-describedby="fileHelp">\
+                                        <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replace("-", " ") +'\' cards</small>\
+                                    </div>'
+                                )
+                            }
                         }
-                    }
 
-                });
-                    tinymce.remove();
-                    tinymce.init({
-                        selector: ".textarea-field",
-                        theme: "modern",
-                        plugins: ['paste', 'link', 'autoresize', 'image'],
-                        image_list: [
-                            {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
-                            {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
-                        ]
-                    })
+                    });
+                        tinymce.remove();
+                        tinymce.init({
+                            selector: ".textarea-field",
+                            theme: "modern",
+                            plugins: ['paste', 'link', 'autoresize', 'image'],
+                            image_list: [
+                                {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
+                                {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
+                            ]
+                        })
+
+                        $('body').off().on('click', '#add_detail_btn' , function(e) { e.preventDefault(); doAddDetail(category)})
+
+                } else {
+                    $('#message').append('\
+                        <div class="alert alert-dismissible alert-danger">\
+                            <button type="button" class="close" data-dismiss="alert">×</button>\
+                            You are not authorized to view this page\
+                        </div>')
+                    }
             });
-            $('body').off().on('click', '#add_detail_btn' , function(e) { e.preventDefault(); doAddDetail(category)})
+            
         };
 
 
@@ -380,91 +434,102 @@ $(document).ready(function(){
         $('#message').empty();
         clearTimeouts();
         var category_url = category.replace("-", "");
-        $.ajax({ url : 'api/' + category_url ,
+        $.ajax({ url : 'api/' + category_url + '/' + id,
                   method: 'OPTIONS'
             })
             .done(function(data) {
 
-                var attributes = data.actions.POST
-
                 $('#main-content').empty();
 
-                $('#main-content').append('\
-                        <div class="card" style="width: 20em;">\
-                        </div>');
+                if (data.hasOwnProperty('actions')) {
 
-                $('#main-content > .card').append('<form id="' + category + '_edit_form" enctype="multipart/form-data">\
-                                                    <fieldset></fieldset>\
-                                                    <button type="button"\
-                                                    id="edit_detail_btn"\
-                                                    class="btn btn-primary"\
-                                                    >Edit ' + to_singular(category) +'</button>\
-                                                    <form>')
+                    var attributes = data.actions.PUT
 
-                Object.keys(attributes).forEach(function(key,index) {
+                    $('#main-content').append('\
+                            <div class="card" style="width: 20em;">\
+                            </div>');
 
-                    if (attributes[key]['required'] == true ) {
+                    $('#main-content > .card').append('<form id="' + category + '_edit_form" enctype="multipart/form-data">\
+                                                        <fieldset></fieldset>\
+                                                        <button type="button"\
+                                                        id="edit_detail_btn"\
+                                                        class="btn btn-primary btn-block"\
+                                                        >Edit ' + to_singular(category) +'</button>\
+                                                        <form>')
 
-                        if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
-                            $('#' + category + '_edit_form > fieldset').append(
-                            '<div class="form-group">\
-                              <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
-                              <input type="text" class="form-control"  name= "'+ key +'" id="'+ key +'" maxlength="'+ attributes[key]['max_length'] +'">\
-                            </div>'
-                            )
-                        } else if (attributes[key]['type'] == 'string') {
-                            $('#' + category + '_edit_form > fieldset').append(
+                    Object.keys(attributes).forEach(function(key,index) {
+
+                        if (attributes[key]['required'] == true ) {
+
+                            if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
+                                $('#' + category + '_edit_form > fieldset').append(
                                 '<div class="form-group">\
-                                    <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
-                                    <textarea class="form-control  textarea-field" name= "'+ key +'"  id="'+ key +'"></textarea>\
+                                <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
+                                <input type="text" class="form-control"  name= "'+ key +'" id="'+ key +'" maxlength="'+ attributes[key]['max_length'] +'">\
                                 </div>'
-                            )
+                                )
+                            } else if (attributes[key]['type'] == 'string') {
+                                $('#' + category + '_edit_form > fieldset').append(
+                                    '<div class="form-group">\
+                                        <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
+                                        <textarea class="form-control  textarea-field" name= "'+ key +'"  id="'+ key +'"></textarea>\
+                                    </div>'
+                                )
 
-                        } else if (attributes[key]['type'] == 'image upload') {
-                            $('#' + category + '_edit_form > fieldset').append(
-                                '<div class="form-group">\
-                                    <label for="'+ key +'">Upload Image</label>\
-                                    <input type="file" class="form-control-file"  name= "'+ key +'" id="'+ key +'" aria-describedby="fileHelp">\
-                                    <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ to_singular(category) +'\' summary</small>\
-                                </div>'
-                            )
+                            } else if (attributes[key]['type'] == 'image upload') {
+                                $('#' + category + '_edit_form > fieldset').append(
+                                    '<div class="form-group">\
+                                        <label for="'+ key +'">Upload Image</label>\
+                                        <input type="file" class="form-control-file"  name= "'+ key +'" id="'+ key +'" aria-describedby="fileHelp">\
+                                        <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ to_singular(category) +'\' summary</small>\
+                                    </div>'
+                                )
+                            }
                         }
-                    }
+                    });
 
-                });
                     tinymce.remove();
-                    tinymce.init({
-                    selector: ".textarea-field",
-                    theme: "modern",
-                    plugins: ['paste', 'link', 'autoresize', 'image'],
-                    image_list: [
-                        {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
-                        {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
-                    ]
-                })
+                            tinymce.init({
+                            selector: ".textarea-field",
+                            theme: "modern",
+                            plugins: ['paste', 'link', 'autoresize', 'image'],
+                            image_list: [
+                                {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
+                                {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
+                            ]
+                        })
+
+                    var original_item = {};
+                    //get details to prepopulate form elements
+                    $.ajax( 'api/' + category_url + '/' + id )
+                                .done(function(item) {
+                                    original_item = item
+                                    Object.keys(item).forEach(function(key,index) {
+                                        if($("#" + key).length != 0) {
+                                            if ($("#" + key).is("textarea")) {
+                                                tinymce.get(key).setContent(item[key]);
+                                            } else if ($("#" + key).is('input:text')) {
+                                                $("#" + key).val(item[key])
+                                            }
+                                        }
+                                    });
+                        });
+
+
+
+                    $('body').off().on('click', '#edit_detail_btn' , function(e) { 
+                        e.preventDefault();
+                        doEditDetail(category, id, original_item);
+                    })
+
+                } else {
+                    $('#message').append('\
+                        <div class="alert alert-dismissible alert-danger">\
+                            <button type="button" class="close" data-dismiss="alert">×</button>\
+                            You are not authorized to view this page\
+                        </div>')
+                }
             });
-
-            var original_item = {};
-            //get details to prepopulate form elements
-            $.ajax( 'api/' + category_url + '/' + id )
-                        .done(function(item) {
-                            original_item = item;
-                            Object.keys(item).forEach(function(key,index) {
-                                if($("#" + key).length != 0) {
-                                    if ($("#" + key).is("textarea")) {
-                                        tinymce.get(key).setContent(item[key]);
-                                    } else if ($("#" + key).is('input:text')) {
-                                        $("#" + key).val(item[key])
-                                    }
-                                }
-                            });
-            });
-
-
-            $('body').off().on('click', '#edit_detail_btn' , function(e) { 
-                e.preventDefault();
-                doEditDetail(category, id, original_item);
-            })
         };
 
 
@@ -512,7 +577,7 @@ $(document).ready(function(){
                 $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + response +'\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
                 </div>')
         })
           .done(function() {
@@ -542,10 +607,10 @@ $(document).ready(function(){
 
         var formDataPatch = findFormChangedValues(item, formData);
 
-        // // If no file is selected, don't remove the old one
-        // if ($('#img').get(0).files.length === 0) {
-        //     formDataPatch.delete('img')
-        // }
+        // If no image is selected, don't remove the old one
+        if ($('#img').get(0).files.length === 0) {
+            formDataPatch.delete('img');
+        }
         
         $.ajax({
            
@@ -581,7 +646,7 @@ $(document).ready(function(){
                 $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + response +'\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
                 </div>')
         })
           .done(function() {
@@ -614,13 +679,8 @@ $(document).ready(function(){
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
-                $('#login-show').remove();
                 $('#LoginModal').modal('hide');
-                $('#navbarColor01').append('<a class="dropdown-toggle navbar-brand" data-toggle="dropdown" href="#">' + username +'</a>\
-                                            <ul class="dropdown-menu dropdown-menu-right">\
-                                            <li><a class="nav-link" id ="signout_link" href="#/account/signout">Sign out</a></li>\
-                                            <li><a class="nav-link" id ="change_pass_link" href="#">Change Password</a></li>\
-                                            </ul>');
+                getCurrentUser()
             })     
     };
 
@@ -764,6 +824,7 @@ $(document).ready(function(){
                 </div>')
         })
           .done(function() {
+                current_user = null;
                 window.location.replace(SITE_URL)
             }) 
     }
@@ -778,7 +839,7 @@ $(document).ready(function(){
     }
 
     function safe_get_img(value) {
-        return value ? value : "pictures/Erevos_world_map.png";
+        return value ? value : DEFAULT_PIC;
     }
 
     function to_singular(value) {
