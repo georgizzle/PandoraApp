@@ -9,6 +9,8 @@ from .serializers import LocationSerializer
 from .models import MajorEvent
 from .serializers import MajorEventSerializer
 
+from django.views.generic.base import TemplateResponseMixin, TemplateView, View
+
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -51,3 +53,6 @@ class MajorEventDetail(generics.RetrieveUpdateDestroyAPIView):
 
 def index(request):
     return render(request, 'cosmos/index.html')
+
+def password_reset_confirm(request):
+    return render(request, 'cosmos/password_reset_confirm.html')

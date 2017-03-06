@@ -150,7 +150,28 @@
             <p><input type="text" class="form-control mr-sm-2" name="token" id="do_res_pass_token_input" placeholder="Token"></p>
             <p><input type="password" class="form-control mr-sm-2" name="new_password1" id="do_res_pass_pass1_input" placeholder="New Password"></p>
             <p><input type="password" class="form-control mr-sm-2" name="new_password2" id="do_res_pass_pass2_input" placeholder="Retype New Password"></p>
-            <p><button type="button" id ="do_change_pass_btn" class="btn btn-success">Reset Password</button>
+            <p><button type="button" id ="do_res_pass_btn" class="btn btn-success">Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--modal for verifying email-->
+<div class="modal" id ="VerifyEmailModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Verify Email</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body-verify-email">
+        <form name="signup_form" id="verify_email_form">
+            <p>Enter the key sent to you by Email</p>
+            <p><input type="text" class="form-control mr-sm-2" name="key" id="verify_email_key_input" placeholder="Key"></p>
+            <p><button type="button" id ="verify_email_btn" class="btn btn-success">Verify Email</button>
         </form>
       </div>
     </div>

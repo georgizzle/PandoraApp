@@ -100,6 +100,16 @@ $(document).ready(function(){
 
     $('body').on('click', '#reset_pass_btn', function() {
         $('.alert').remove();
+        goResetPassword();
+    });
+
+    $('body').on('click', '#verify_email_btn', function() {
+        $('.alert').remove();
+        doVerifyEmail();
+    });
+
+    $('body').on('click', '#do_res_pass_btn', function() {
+        $('.alert').remove();
         doResetPassword();
     });
 
@@ -632,7 +642,8 @@ $(document).ready(function(){
           .done(function() {
                 csrftoken = getCookie('csrftoken');
                 $('#RegModal').modal('hide');
-                $('#message').append('\
+                $('#VerifyEmailModal').modal('show');
+                $('#modal-body-verify-email').prepend('\
                 <div class="alert alert-dismissible alert-success">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
                     A confirmation email has been sent to <strong>'+ email +'</strong>\
@@ -665,7 +676,7 @@ $(document).ready(function(){
             })     
     };
 
-    function doResetPassword() {
+    function goResetPassword() {
        var email = $('#res_pass_email_input').val();
        var data = $('#reset_pass_form').serialize();
        $.ajax({
@@ -687,6 +698,54 @@ $(document).ready(function(){
                 <div class="alert alert-dismissible alert-success">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
                     An email has been sent to <strong>'+ email +'</strong>\
+                </div>')
+            })     
+    };
+
+    function doResetPassword() {
+       var data = $('#do_reset_pass_form').serialize();
+       $.ajax({
+            url: 'api/rest-auth/password/reset/confirm/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-do-reset-pass').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#DoResetPassModal').modal('hide');
+                $('#modal-body-do-reset-pass').append('\
+                <div class="alert alert-dismissible alert-success">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    Your password has been reset!\
+                </div>')
+            })     
+    };
+
+    function doVerifyEmail() {
+       var data = $('#verify_email_form').serialize();
+       $.ajax({
+            url: 'api/rest-auth/registration/verify-email/',
+            type: 'POST',
+            data: data,
+        }).fail(function(response) {
+                $('#modal-body-reset-pass').prepend('\
+                <div class="alert alert-dismissible alert-danger">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                </div>')
+        })
+          .done(function() {
+                csrftoken = getCookie('csrftoken');
+                $('#VerifyEmailModal').modal('hide');
+                $('#message').append('\
+                <div class="alert alert-dismissible alert-success">\
+                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                    Your email was verified successfully!\
                 </div>')
             })     
     };
