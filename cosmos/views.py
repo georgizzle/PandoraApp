@@ -36,7 +36,6 @@ class CategoryList(generics.ListCreateAPIView):
 
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
@@ -51,6 +50,9 @@ class KingdomDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Kingdom.objects.all()
     serializer_class = KingdomSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class LocationList(generics.ListCreateAPIView):

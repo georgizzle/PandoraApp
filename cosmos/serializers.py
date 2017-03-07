@@ -1,8 +1,19 @@
 from rest_framework import serializers
 from .models import Category, Kingdom, Location, MajorEvent
 from django.contrib.auth.models import User, Group
+from guardian.shortcuts import assign_perm
 
 default_img='pictures/Erevos_world_map.png'
+
+moderator_group_name = 'Moderators'
+
+def assign_object_perms(serializer, instance):
+
+    user = serializer.context['request'].user
+    for group in user.groups.all():
+        if group.name != moderator_group_name:
+            assign_perm('change_kingdom', group, instance)
+            assign_perm('add_kingdom', group, instance)
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -57,12 +68,13 @@ class KingdomSerializer(serializers.Serializer):
 
     def create(self, validated_data):
 
-        return Kingdom.objects.create(**validated_data)
+        kingdom = Kingdom.objects.create(**validated_data)
+        assign_object_perms(self, kingdom)
+
+        return kingdom
 
     def update(self, instance, validated_data):
-        """
-        Update and return an existing `Snippet` instance, given the validated data.
-        """
+
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         instance.history = validated_data.get('history', instance.history)
@@ -108,7 +120,10 @@ class MajorEventSerializer(serializers.Serializer):
 
     def create(self, validated_data):
 
-        return Kingdom.objects.create(**validated_data)
+        major_event = MajorEvent.objects.create(**validated_data)
+        assign_object_perms(self, major_event)
+
+        return major_event
 
     def update(self, instance, validated_data):
 

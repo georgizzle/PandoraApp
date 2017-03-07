@@ -227,61 +227,67 @@ $(document).ready(function(){
 
 
     function goCategory(category) {
-                    $('#message').empty();
-                    clearTimeouts()
-                    var category_url = category.replace("-", "");
-                    $.ajax('api/' + category_url)
-                    .done(function(data) {
-                    $('#main-content').empty();
-                    if (data.length != 0) {
-                        data.forEach(function(item) {
-                                    if (item.final) {
-                                        $('#main-content').append('\
-                                            <div class="card" style="width: 20rem;">\
-                                              <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.img) + '" alt="Card image cap">\
-                                              <div class="card-block">\
-                                                <h4 class="card-title">' + item.name + '</h4>\
-                                                <p class="card-text">' + item.description + '</p>\
-                                              </div>\
-                                                <a href="#/'+ category +'/'+ item.id +'" class="item-detail" id= "' + category + '_' + item.id +'">\
-                                                    <div class="card-footer">\
-                                                      <small class="text-muted">See ' + item.name + ' details</small>\
-                                                    </div>\
-                                                </a>\
-                                            </div>');
-                                    }
-                        })
-
-                    }
-
-                    var canAdd = null;
-
-                    if (current_user != null) {
-                        current_user.groups.forEach(function(item){ 
-                            if (item.name == MODERATOR_GROUP) { 
-                                canAdd = true; 
-                            }
-                        });
-                    }
-                    
-                    if (canAdd){
-                        $('#main-content').append('<div class="card" style="width: 20rem;">\
-                                <div class="card-block">\
-                                    <a href="#/'+ category +'/add" id= "' + category + '_add">\
-                                        <h4 class="card-title">Add new '+ to_singular(category) +'</h4>\
+        if (current_user == null) {
+            getCurrentUser()
+        }
+        $('#message').empty();
+        clearTimeouts()
+        var category_url = category.replace("-", "");
+        $.ajax('api/' + category_url)
+        .done(function(data) {
+        $('#main-content').empty();
+        if (data.length != 0) {
+            data.forEach(function(item) {
+                        if (item.final) {
+                            $('#main-content').append('\
+                                <div class="card" style="width: 20rem;">\
+                                    <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.img) + '" alt="Card image cap">\
+                                    <div class="card-block">\
+                                    <h4 class="card-title">' + item.name + '</h4>\
+                                    <p class="card-text">' + item.description + '</p>\
+                                    </div>\
+                                    <a href="#/'+ category +'/'+ item.id +'" class="item-detail" id= "' + category + '_' + item.id +'">\
+                                        <div class="card-footer">\
+                                            <small class="text-muted">See ' + item.name + ' details</small>\
+                                        </div>\
                                     </a>\
-                                </div>\
-                                <div class="card-footer">\
-                                    <small class="text-muted">Viewable only by Moderators</small>\
-                                </div>\
-                        </div>')
-                    }
-                    setTimeout(function() {goCategory(category)}, TIMEOUT);
-                   })
+                                </div>');
+                        }
+            })
+
+        }
+
+        var canAdd = null;
+
+        if (current_user != null) {
+            current_user.groups.forEach(function(item){ 
+                if (item.name == MODERATOR_GROUP) { 
+                    canAdd = true; 
+                }
+            });
+        }
+
+        if (canAdd){
+            $('#main-content').append('<div class="card" style="width: 20rem;">\
+                    <div class="card-block">\
+                        <a href="#/'+ category +'/add" id= "' + category + '_add">\
+                            <h4 class="card-title">Add new '+ to_singular(category) +'</h4>\
+                        </a>\
+                    </div>\
+                    <div class="card-footer">\
+                        <small class="text-muted">Viewable only by Moderators</small>\
+                    </div>\
+            </div>')
+        }
+        setTimeout(function() {goCategory(category)}, TIMEOUT);
+        })
     }
 
 
     function goDetail(category, id) {
+            if (current_user == null) {
+                getCurrentUser()
+            }
             $('#message').empty();
             clearTimeouts()
             var category_url = category.replace("-", "");
@@ -376,7 +382,7 @@ $(document).ready(function(){
 
                     Object.keys(attributes).forEach(function(key,index) {
 
-                        if (true ) {
+                        if (attributes[key]['required'] == true ) {
 
                             if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
                                 $('#' + category + '_add_form > fieldset').append(
