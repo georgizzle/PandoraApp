@@ -583,8 +583,11 @@ $(document).ready(function(){
                 $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
-                </div>')
+                    <strong>Something went wrong: </strong>\
+                </div>');
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                    $('#message>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                });
         })
           .done(function() {
                 $('#message').append('\
@@ -650,10 +653,13 @@ $(document).ready(function(){
             },
         }).fail(function(response) {
                 $('#message').append('\
-                <div class="alert alert-dismissible alert-danger">\
-                    <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
-                </div>')
+                    <div class="alert alert-dismissible alert-danger">\
+                        <button type="button" class="close" data-dismiss="alert">×</button>\
+                        <strong>Something went wrong: </strong>\
+                    </div>');
+                    Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#message>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 $('#message').append('\
@@ -680,8 +686,11 @@ $(document).ready(function(){
                 $('#modal-body-login').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-login>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -702,8 +711,11 @@ $(document).ready(function(){
                 $('#modal-body-reg').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-reg>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -728,8 +740,11 @@ $(document).ready(function(){
                 $('#modal-body-change-pass').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-change-pass>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -753,8 +768,11 @@ $(document).ready(function(){
                 $('#modal-body-reset-pass').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-reset-pass>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -778,8 +796,11 @@ $(document).ready(function(){
                 $('#modal-body-do-reset-pass').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-do-reset-pass>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -802,8 +823,11 @@ $(document).ready(function(){
                 $('#modal-body-reset-pass').prepend('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#modal-body-reset-pass>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 csrftoken = getCookie('csrftoken');
@@ -826,8 +850,11 @@ $(document).ready(function(){
                 $('#message').append('\
                 <div class="alert alert-dismissible alert-danger">\
                     <button type="button" class="close" data-dismiss="alert">×</button>\
-                    <strong>Request failed: </strong>' + JSON.stringify(response) +'\
+                    <strong>Something went wrong: </strong>\
                 </div>')
+                Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#message>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
         })
           .done(function() {
                 current_user = null;
