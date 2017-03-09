@@ -3,3 +3,7 @@
     object-fit: cover;
     overflow: hidden;
 }
+
+.card {
+    width: 20rem;
+}

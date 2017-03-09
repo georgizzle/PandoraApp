@@ -8,7 +8,7 @@ class Category(models.Model):
     name     = models.CharField(max_length=30)  # The name of the category
     description = tinymce_models.HTMLField(blank=True, null=True) # The description of the category
     cr_date  = models.DateTimeField(auto_now_add=True) # Time and date of creation, defaults to current time
-    img      = models.ImageField(upload_to='pictures/category/%Y/%m/%d/', default=default_img) # The link for the image thumbnail
+    img      = models.ImageField(upload_to='pictures/category/%Y/%m/%d/', default=default_img, blank=True) # The link for the image thumbnail
 
     def __str__(self):
         return 'Category: ' + self.name
@@ -35,7 +35,7 @@ class Kingdom(models.Model):
     geography  = models.ForeignKey(Location, blank=True, null=True)
     other_info = tinymce_models.HTMLField(blank=True, null=True)
     final      = models.BooleanField(default=False)
-    img        = models.ImageField(upload_to='pictures/kingdoms/%Y/%m/%d/', default=default_img)
+    img        = models.ImageField(upload_to='pictures/kingdoms/%Y/%m/%d/', default=default_img, blank=True)
 
 
     def __str__(self):
@@ -50,7 +50,7 @@ class MajorEvent(models.Model):
     history   = tinymce_models.HTMLField(null=True)
     kingdom   = models.ForeignKey(Kingdom)
     final     = models.BooleanField(default=False)
-    img       = models.ImageField(upload_to='pictures/majorevents/%Y/%m/%d/', default=default_img)
+    img       = models.ImageField(upload_to='pictures/majorevents/%Y/%m/%d/', default=default_img, blank=True)
 
     def __str__(self):
         ret_str = 'Major Event: ' + self.name

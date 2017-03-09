@@ -327,7 +327,7 @@ $(document).ready(function(){
 
                             var canEdit = null;
 
-                            if (current_user != null) {
+                            if (current_user != null && !item.old_version ) {
                                 current_user.groups.forEach(function(item){ 
                                     if (item.name == MODERATOR_GROUP) { 
                                         canEdit = true; 
@@ -382,7 +382,8 @@ $(document).ready(function(){
 
                     Object.keys(attributes).forEach(function(key,index) {
 
-                        if (attributes[key]['required'] == true ) {
+                        //if (attributes[key]['required'] == true ) {
+                        if (true ) {
 
                             if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
                                 $('#' + category + '_add_form > fieldset').append(

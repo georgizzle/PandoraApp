@@ -7,13 +7,14 @@ default_img='pictures/Erevos_world_map.png'
 
 moderator_group_name = 'Moderators'
 
-def assign_object_perms(serializer, instance):
+
+def assign_object_perms(modelname, serializer, instance):
 
     user = serializer.context['request'].user
     for group in user.groups.all():
         if group.name != moderator_group_name:
-            assign_perm('change_kingdom', group, instance)
-            assign_perm('add_kingdom', group, instance)
+            assign_perm('change_{}'.format(modelname), group, instance)
+            assign_perm('add_{}'.format(modelname), group, instance)
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -69,7 +70,7 @@ class KingdomSerializer(serializers.Serializer):
     def create(self, validated_data):
 
         kingdom = Kingdom.objects.create(**validated_data)
-        assign_object_perms(self, kingdom)
+        assign_object_perms('kingdom', self, kingdom)
 
         return kingdom
 
@@ -79,7 +80,7 @@ class KingdomSerializer(serializers.Serializer):
         instance.description = validated_data.get('description', instance.description)
         instance.history = validated_data.get('history', instance.history)
         instance.other_info = validated_data.get('other_info', instance.other_info)
-        instance.final = validated_data.get('final', instance.final)
+        instance.final = False
         instance.img = validated_data.get('img', instance.img)
         instance.save()
         return instance
@@ -121,7 +122,7 @@ class MajorEventSerializer(serializers.Serializer):
     def create(self, validated_data):
 
         major_event = MajorEvent.objects.create(**validated_data)
-        assign_object_perms(self, major_event)
+        assign_object_perms('majorevent', self, major_event)
 
         return major_event
 
