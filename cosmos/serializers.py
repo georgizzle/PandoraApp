@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Kingdom, Location, MajorEvent
+from .models import Category, Element
 from django.contrib.auth.models import User, Group
 from guardian.shortcuts import assign_perm
 
@@ -30,69 +30,76 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('url', 'username', 'email', 'groups','is_staff')
 
 
-class LocationSerializer(serializers.Serializer):
-    id          = serializers.IntegerField(read_only=True)
-    type        = serializers.CharField(max_length=30, allow_null=True)
-    description = serializers.CharField(allow_blank=True, allow_null=True)
-    latitude    = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
-    longitude   = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
-    altitude    = serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True)
-    final       = serializers.BooleanField(default=False)
+# class LocationSerializer(serializers.Serializer):
+#     id          = serializers.IntegerField(read_only=True)
+#     type        = serializers.CharField(max_length=30, allow_null=True)
+#     description = serializers.CharField(allow_blank=True, allow_null=True)
+#     latitude    = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
+#     longitude   = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
+#     altitude    = serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True)
+#     final       = serializers.BooleanField(default=False)
+#
+#
+#     def create(self, validated_data):
+#
+#         return Location.objects.create(**validated_data)
+#
+#     def update(self, instance, validated_data):
+#
+#         instance.type = validated_data.get('type', instance.type)
+#         instance.description = validated_data.get('description', instance.description)
+#         instance.latitude = validated_data.get('latitude', instance.latitude)
+#         instance.longitude = validated_data.get('longitude', instance.longitude)
+#         instance.altitude = validated_data.get('altitude', instance.altitude)
+#         instance.final = validated_data.get('final', instance.final)
+#         instance.save()
+#         return instance
 
+
+class ElementSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=30)
+    summary = serializers.CharField(allow_blank=True, allow_null=True)
+    description = serializers.CharField(allow_blank=True, allow_null=True)
+    summary_image = serializers.ImageField(allow_null=True,  use_url=False)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    final = serializers.BooleanField(default=False)
+
+    class Meta:
+
+        lookup_field = 'name__iexact'
 
     def create(self, validated_data):
 
-        return Location.objects.create(**validated_data)
+        element = Element.objects.create(**validated_data)
+        assign_object_perms('element', self, element)
 
-    def update(self, instance, validated_data):
-
-        instance.type = validated_data.get('type', instance.type)
-        instance.description = validated_data.get('description', instance.description)
-        instance.latitude = validated_data.get('latitude', instance.latitude)
-        instance.longitude = validated_data.get('longitude', instance.longitude)
-        instance.altitude = validated_data.get('altitude', instance.altitude)
-        instance.final = validated_data.get('final', instance.final)
-        instance.save()
-        return instance
-
-
-class KingdomSerializer(serializers.Serializer):
-    id          = serializers.IntegerField(read_only=True)
-    name        = serializers.CharField(max_length=30)
-    description = serializers.CharField(allow_blank=True, allow_null=True)
-    history     = serializers.CharField(allow_blank=True, allow_null=True)
-    geography   = LocationSerializer(read_only=True)
-    other_info  = serializers.CharField(allow_blank=True, allow_null=True)
-    img         = serializers.ImageField(allow_null=True,  use_url=False)
-    final       = serializers.BooleanField(default=False)
-
-
-    def create(self, validated_data):
-
-        kingdom = Kingdom.objects.create(**validated_data)
-        assign_object_perms('kingdom', self, kingdom)
-
-        return kingdom
+        return element
 
     def update(self, instance, validated_data):
 
         instance.name = validated_data.get('name', instance.name)
+        instance.summary = validated_data.get('summary', instance.summary)
         instance.description = validated_data.get('description', instance.description)
-        instance.history = validated_data.get('history', instance.history)
-        instance.other_info = validated_data.get('other_info', instance.other_info)
         instance.final = False
-        instance.img = validated_data.get('img', instance.img)
+        instance.category_id = validated_data.get('category', instance.category)
+        instance.summary_image = validated_data.get('summary_image', instance.summary_image)
         instance.save()
         return instance
 
 
 class CategorySerializer(serializers.Serializer):
-    id          = serializers.IntegerField(read_only=True)
-    name        = serializers.CharField(max_length=30)
-    description = serializers.CharField(allow_blank=True, allow_null=True)
-    cr_date     = serializers.DateTimeField()
-    img         = serializers.ImageField(allow_null=True, use_url=False)
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=30)
+    summary = serializers.CharField(allow_blank=True, allow_null=True)
+    template = serializers.CharField(allow_blank=True, allow_null=True)
+    cr_date = serializers.DateTimeField()
+    summary_image = serializers.ImageField(allow_null=True, use_url=False)
 
+    class Meta:
+
+        lookup_field = 'name__iexact'
 
     def create(self, validated_data):
 
@@ -101,38 +108,7 @@ class CategorySerializer(serializers.Serializer):
     def update(self, instance, validated_data):
 
         instance.name = validated_data.get('name', instance.name)
-        instance.description = validated_data.get('description', instance.description)
-        instance.cr_date = validated_data.get('cr_date', instance.cr_date)
-        instance.img = validated_data.get('img', instance.img)
-        instance.save()
-        return instance
-
-
-class MajorEventSerializer(serializers.Serializer):
-    id          = serializers.IntegerField(read_only=True)
-    name        = serializers.CharField(max_length=30)
-    type        = serializers.CharField(max_length=30, allow_null=True)
-    description = serializers.CharField(allow_blank=True, allow_null=True)
-    history     = serializers.CharField(allow_blank=True, allow_null=True)
-    kingdom     = KingdomSerializer(read_only=True)
-    img         = serializers.ImageField(allow_null=True, use_url=False)
-    final       = serializers.BooleanField(default=False)
-
-
-    def create(self, validated_data):
-
-        major_event = MajorEvent.objects.create(**validated_data)
-        assign_object_perms('majorevent', self, major_event)
-
-        return major_event
-
-    def update(self, instance, validated_data):
-
-        instance.name = validated_data.get('name', instance.name)
-        instance.type = validated_data.get('type', instance.type)
-        instance.description = validated_data.get('description', instance.description)
-        instance.history = validated_data.get('history', instance.history)
-        instance.final = validated_data.get('final', instance.final)
+        instance.summary = validated_data.get('summary', instance.summary)
         instance.img = validated_data.get('img', instance.img)
         instance.save()
         return instance

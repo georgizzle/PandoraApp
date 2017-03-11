@@ -24,6 +24,7 @@ var SITE_URL = "http://localhost:8000/cosmos";
 var DEFAULT_PIC = "pictures/Erevos_world_map.png";
 var MODERATOR_GROUP = "Moderators"
 var current_user = null;
+var USE_TEMPLATES = true;
 
 
 $(document).ready(function(){
@@ -134,7 +135,7 @@ $(document).ready(function(){
     });
 
     var categories = {"kingdoms" : {
-                                     "fields" : [ "name", "description", "history", {"geography":["id", "type", "description"]}, "other_info"]
+                                     "fields" : [ "name", "description"]
                                    },
                       "major-events" : {
                                      "fields" : [ "name", "description", "history", "type", {"kingdom":["id", "name", "description"]}]
@@ -165,12 +166,12 @@ $(document).ready(function(){
         goAddDetail(category);
     });
 
-    crossroads.addRoute("{category}/{id}",function(category, id){
-        goDetail(category, id);
+    crossroads.addRoute("{category}/{name}",function(category, id){
+        goDetail(category, name);
     });
 
-     crossroads.addRoute("{category}/{id}/edit",function(category, id){
-        goEditDetail(category, id);
+     crossroads.addRoute("{category}/{name}/edit",function(category, id){
+        goEditDetail(category, name);
     });
 
 
@@ -209,10 +210,10 @@ $(document).ready(function(){
                             var name_attr = item.name.replace(" ", "-").toLowerCase();
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                  <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.img) + '" alt="Card image cap">\
+                                  <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
                                   <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
-                                    <p class="card-text">' + item.description + '</p>\
+                                    <p class="card-text">' + item.summary + '</p>\
                                   </div>\
                                     <a href="#/'+ name_attr +'" class ="view-category" id= "'+ name_attr + '">\
                                         <div class="card-footer">\
@@ -232,8 +233,7 @@ $(document).ready(function(){
         }
         $('#message').empty();
         clearTimeouts()
-        var category_url = category.replace("-", "");
-        $.ajax('api/' + category_url)
+        $.ajax('api/elements/' + category)
         .done(function(data) {
         $('#main-content').empty();
         if (data.length != 0) {
@@ -244,9 +244,10 @@ $(document).ready(function(){
                                     <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.img) + '" alt="Card image cap">\
                                     <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
-                                    <p class="card-text">' + item.description + '</p>\
+                                    <p class="card-text">' + item.summary + '</p>\
                                     </div>\
-                                    <a href="#/'+ category +'/'+ item.id +'" class="item-detail" id= "' + category + '_' + item.id +'">\
+                                    <a href="#/'+ category +'/'+ item.name.toLowerCase().replaceAll(" ", "-") +'" class="item-detail" id= "\
+                                    ' + category + '_' + item.name.toLowerCase().replaceAll(" ", "-") +'">\
                                         <div class="card-footer">\
                                             <small class="text-muted">See ' + item.name + ' details</small>\
                                         </div>\
@@ -284,19 +285,19 @@ $(document).ready(function(){
     }
 
 
-    function goDetail(category, id) {
+    function goDetail(category, name) {
             if (current_user == null) {
                 getCurrentUser()
             }
             $('#message').empty();
             clearTimeouts()
-            var category_url = category.replace("-", "");
-            $.ajax( 'api/' + category_url + '/' + id )
-            .done(function(item) {
+            $.ajax( 'api/elements/' + category + '/' + name )
+            .done(function(response) {
                 $('#main-content').empty();
-                if (item.length == 0) {
+                if (response.length != 1) {
                         $('#main-content').append('<p>Oops! There was an error!</p>');
                 } else {
+                        item = response[0];
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
@@ -306,18 +307,20 @@ $(document).ready(function(){
                             categories[category]["fields"].forEach(function(field) {
                                 field_name = typeof field === 'object' ? Object.keys(field)[0] : field
                                 $('#main-content > .card').append('\
-                                    <div class="card-block" id="' + category + '-' + field_name + '-' + id + '">\
+                                    <div class="card-block" id="' + category + '-' + field_name + '-' + name + '">\
                                     </div>');
                                 if (typeof field !== 'object' && item[field] !== null) {
-                                    $('#' + category + '-' + field_name + '-' + id).append('\
-                                    <h4 class="card-title">' + field_name.replace("_", " ") + '</h4>\
-                                    <p class="card-text">' + item[field] + '</p>')
+                                    $('#main-content > .card').append('\
+                                    <div class="card-block" id="' + category + '-' + field_name + '-' + name + '">\
+                                    <h4 class="card-title">' + field_name.replaceAll("_", " ") + '</h4>\
+                                    <p class="card-text">' + item[field] + '</p></div>')
                                 } else if (typeof field === 'object' && item[field_name] !== null) {
-                                    $('#' + category + '-' + field_name + '-' + id).append('\
-                                        <h4 class="card-title">' + field_name.replace("_", " ") + '</h4>')
+                                    $('#main-content > .card').append('\
+                                        <div class="card-block" id="' + category + '-' + field_name + '-' + name + '">\
+                                        <h4 class="card-title">' + field_name.replaceAll("_", " ") + '</h4></div>')
                                         field[field_name].forEach(function(subfield) {
-                                            $('#' + category + '-' + field_name + '-' + id).append('\
-                                                <h6 class="card-subtitle text-muted">' + subfield.replace("_", " ") + '</h6>\
+                                            $('#' + category + '-' + field_name + '-' + name).append('\
+                                                <h6 class="card-subtitle text-muted">' + subfield.replaceAll("_", " ") + '</h6>\
                                                 <p class="card-text">' + item[field_name][subfield] + '</p>'
                                             )
 
@@ -337,7 +340,8 @@ $(document).ready(function(){
                                     
                             if (canEdit) {
                                 $('#main-content > .card').append('\
-                                        <a href="#/'+ category +'/'+ item.id +'/edit" class="item-detail_edit" id= "' + category + '_' + item.id +'_edit">\
+                                        <a href="#/'+ category +'/'+ item.name.toLowerCase().replaceAll(" ", "-") +'/edit"\
+                                         class="item-detail_edit" id= "' + category + '_' + item.name.toLowerCase().replaceAll(" ", "-") +'_edit">\
                                             <div class="card-footer">\
                                               <small class="text-muted">Edit ' + item.name + '</small>\
                                             </div>\
@@ -348,7 +352,7 @@ $(document).ready(function(){
                             $('#main-content').append('<p>This item is not finalized yet</p>');
                         }
                 }
-            setTimeout(function() {goDetail(category, id)}, TIMEOUT);
+            setTimeout(function() {goDetail(category, name)}, TIMEOUT);
             });
     };
 
@@ -356,8 +360,7 @@ $(document).ready(function(){
     function goAddDetail(category) {
         $('#message').empty();
         clearTimeouts()
-        var category_url = category.replace("-", "");
-        $.ajax({ url : 'api/' + category_url ,
+        $.ajax({ url : 'api/elements/' + category ,
                   method: 'OPTIONS'
             })
             .done(function(data) {
@@ -380,10 +383,11 @@ $(document).ready(function(){
                                                             >Add ' + to_singular(category) +'</button>\
                                                             <form>')
 
+                    var description_exists = false;
+
                     Object.keys(attributes).forEach(function(key,index) {
 
-                        //if (attributes[key]['required'] == true ) {
-                        if (true ) {
+                        if (attributes[key]['required'] == true) {
 
                             if (attributes[key]['type'] == 'string' && attributes[key].hasOwnProperty('max_length')) {
                                 $('#' + category + '_add_form > fieldset').append(
@@ -393,6 +397,9 @@ $(document).ready(function(){
                                 </div>'
                                 )
                             } else if (attributes[key]['type'] == 'string') {
+                                if (key == 'description') {
+                                    description_exists = true;
+                                }
                                 $('#' + category + '_add_form > fieldset').append(
                                     '<div class="form-group">\
                                         <label for="'+ key +'">'+ attributes[key]['label'] +'</label>\
@@ -405,13 +412,14 @@ $(document).ready(function(){
                                     '<div class="form-group">\
                                         <label for="'+ key +'">Upload Image</label>\
                                         <input type="file" class="form-control-file"  name= "'+ key +'" id="'+ key +'" aria-describedby="fileHelp">\
-                                        <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replace("-", " ") +'\' cards</small>\
+                                        <small id="fileHelp" class="form-text text-muted">Upload an image. This image will be shown in '+ category.replaceAll("-", " ") +'\' cards</small>\
                                     </div>'
                                 )
                             }
                         }
 
                     });
+
                         tinymce.remove();
                         tinymce.init({
                             selector: ".textarea-field",
@@ -422,6 +430,19 @@ $(document).ready(function(){
                                 {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
                             ]
                         })
+
+                         if (description_exists && USE_TEMPLATES) {
+                                $.ajax({ url : 'api/categories/' + category ,
+                                    method: 'GET'
+                                }).done(function(response) {
+                                    // Populating description with template
+                                    tinymce.get('description').setContent(response.template);
+                                    $('#' + category + '_add_form > fieldset').append('\
+                                        <input type="hidden"  name= "category" id="category" value ="' + response.id + '">\
+                                    ');
+
+                                })
+                        }
 
                         $('body').off().on('click', '#add_detail_btn' , function(e) { e.preventDefault(); doAddDetail(category)})
 
@@ -438,9 +459,10 @@ $(document).ready(function(){
 
 
     function goEditDetail(category, id) {
+        // categoriesNavBar()
         $('#message').empty();
         clearTimeouts();
-        var category_url = category.replace("-", "");
+        var category_url = category.replaceAll("-", "");
         $.ajax({ url : 'api/' + category_url + '/' + id,
                   method: 'OPTIONS'
             })
@@ -542,7 +564,6 @@ $(document).ready(function(){
 
     function doAddDetail (category) {
         $('#message').empty();
-        var category_url = category.replace("-", "");
         if (!window.FormData) {
             alert('Your browser does not support AJAX multipart form submissions');
             return;
@@ -552,7 +573,7 @@ $(document).ready(function(){
 
         $.ajax({
            
-            url: 'api/' + category_url,
+            url: 'api/elements/' + category + '/',
             type: 'POST',
 
             // Form data
@@ -594,7 +615,7 @@ $(document).ready(function(){
                 $('#message').append('\
                     <div class="alert alert-dismissible alert-success" id="alert_success_edit">\
                         <button type="button" class="close" data-dismiss="alert">&times;</button>\
-                        '+ to_singular(category.replace("-", " ")) + ' was added successfully!\
+                        '+ to_singular(category.replaceAll("-", " ")) + ' was added successfully!\
                     </div>')
             })
 
@@ -605,7 +626,7 @@ $(document).ready(function(){
     
     function doEditDetail (category, id, item) {
         $('#message').empty();
-        var category_url = category.replace("-", "");
+        var category_url = category.replaceAll("-", "");
         if (!window.FormData) {
             alert('Your browser does not support AJAX multipart form submissions');
             return;
@@ -666,7 +687,7 @@ $(document).ready(function(){
                 $('#message').append('\
                     <div class="alert alert-dismissible alert-success">\
                         <button type="button" class="close" data-dismiss="alert">&times;</button>\
-                        '+ to_singular(category.replace("-", " ")) + ' was updated successfully!\
+                        '+ to_singular(category.replaceAll("-", " ")) + ' was updated successfully!\
                     </div>')
             })
 
@@ -897,7 +918,10 @@ $(document).ready(function(){
 });
 
 
-
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
 
 
 
