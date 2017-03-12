@@ -18,7 +18,6 @@ moderator_group_name = 'Moderators'
 @api_view(['GET',])
 @permission_classes((permissions.AllowAny,))
 def current_user(request):
-
     serializer = None
     if request.user.is_authenticated():
         serializer = UserSerializer(request.user, context={'request': request})
@@ -52,7 +51,6 @@ class ElementList(generics.ListCreateAPIView):
     serializer_class = ElementSerializer
 
     def list(self, request, *args, **kwargs):
-
         queryset = self.get_queryset()
         serializer = ElementSerializer(queryset, many=True)
         for data in serializer.data:
@@ -78,6 +76,7 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Element.objects.all()
     serializer_class = ElementSerializer
+    lookup_field = 'name__iexact'
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -96,11 +95,15 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
                 serializer_data['old_version'] = True
         return Response(serializer_data)
 
+    def get_queryset(self):
+        #if category name is more than one words, it will come in word1-word2 format
+        category = self.kwargs['category'].replace('-', ' ')
+        return Element.objects.filter(category__name__iexact=category)
+
     def get_object(self):
         self.kwargs['category'] = self.kwargs['category'].replace('-', ' ')
-        self.kwargs['name__iexact'] = inflection.pluralize(self.kwargs['name__iexact'].replace('-', ' '))
-        print(self.kwargs['name__iexact'])
-        obj = super(CategoryDetail, self).get_object()
+        self.kwargs['name__iexact'] = self.kwargs['name__iexact'].replace('-', ' ')
+        obj = super(ElementDetail, self).get_object()
         return obj
 
     def get_serializer_context(self):

@@ -24,6 +24,7 @@ var SITE_URL = "http://localhost:8000/cosmos";
 var DEFAULT_PIC = "pictures/Erevos_world_map.png";
 var MODERATOR_GROUP = "Moderators"
 var current_user = null;
+var category_nav = false;
 var USE_TEMPLATES = true;
 
 
@@ -70,14 +71,31 @@ $(document).ready(function(){
           .done(function(user) {
                 current_user = user;
                 $('#login-show').remove();
-                $('#navbarColor01').append('<a class="dropdown-toggle navbar-brand" data-toggle="dropdown" href="#">' + current_user.username +'</a>\
-                        <ul class="dropdown-menu dropdown-menu-right">\
-                        <li><a class="nav-link" id ="signout_link" href="#/account/signout">Sign out</a></li>\
-                        <li><a class="nav-link" id ="change_pass_link" href="#">Change Password</a></li>\
-                        </ul>');
+                $('#navbarColor01').append('<ul class="navbar-nav">\
+                    <li class="nav-item dropdown">\
+                        <a class="nav-link dropdown-toggle" id="loggedin" data-toggle="dropdown" href="#">' + current_user.username +'</a>\
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loggedin">\
+                            <a class="dropdown-item" id ="signout_link" href="#/account/signout">Sign out</a>\
+                            <a class="dropdown-item" id ="change_pass_link" href="#">Change Password</a>\
+                        </div>\
+                    </li>\
+                    </ul>');
             })   
     };
     
+    function populateCategoryNav(){
+        $.ajax( 'api/categories' )
+            .done(function(data) {
+                $('#categories-nav-list').empty();
+                data.forEach(function(item) {
+                            var name_attr = item.name.replace(" ", "-").toLowerCase();
+                            $('#categories-nav-list').append('\
+                                <a class="dropdown-item" id ="'+ name_attr + '-nav-link" href="#/'+ name_attr +'">' + item.name + '</a>\
+                            ')
+                        })
+            });
+        category_nav = true;
+    }
 
     $('body').on('click', '#login-show', function() {
         $('#LoginModal').modal('show');
@@ -166,11 +184,11 @@ $(document).ready(function(){
         goAddDetail(category);
     });
 
-    crossroads.addRoute("{category}/{name}",function(category, id){
+    crossroads.addRoute("{category}/show/{name}",function(category, name){
         goDetail(category, name);
     });
 
-     crossroads.addRoute("{category}/{name}/edit",function(category, id){
+     crossroads.addRoute("{category}/edit/{name}",function(category, name){
         goEditDetail(category, name);
     });
 
@@ -203,6 +221,7 @@ $(document).ready(function(){
         $.ajax( 'api/categories' )
             .done(function(data) {
             $('#main-content').empty();
+            $('#categories-nav-list').empty();
             if (data.length == 0) {
              $('#main-content').append('<p>The are no data (Yet)</p>');
             } else {
@@ -221,7 +240,12 @@ $(document).ready(function(){
                                         </div>\
                                     </a>\
                                 </div>');
+                            $('#categories-nav-list').append('\
+                                <a class="dropdown-item" id ="'+ name_attr + '-nav-link" href="#/'+ name_attr +'">' + item.name + '</a>\
+                            ')
                         })
+
+                        category_nav = true;
                     }
             });
     };
@@ -230,6 +254,9 @@ $(document).ready(function(){
     function goCategory(category) {
         if (current_user == null) {
             getCurrentUser()
+        }
+        if (!category_nav) {
+            populateCategoryNav();
         }
         $('#message').empty();
         clearTimeouts()
@@ -246,7 +273,7 @@ $(document).ready(function(){
                                     <h4 class="card-title">' + item.name + '</h4>\
                                     <p class="card-text">' + item.summary + '</p>\
                                     </div>\
-                                    <a href="#/'+ category +'/'+ item.name.toLowerCase().replaceAll(" ", "-") +'" class="item-detail" id= "\
+                                    <a href="#/'+ category +'/show/'+ item.name.toLowerCase().replaceAll(" ", "-") +'" class="item-detail" id= "\
                                     ' + category + '_' + item.name.toLowerCase().replaceAll(" ", "-") +'">\
                                         <div class="card-footer">\
                                             <small class="text-muted">See ' + item.name + ' details</small>\
@@ -286,18 +313,20 @@ $(document).ready(function(){
 
 
     function goDetail(category, name) {
+            if (!category_nav) {
+                populateCategoryNav();
+            }
             if (current_user == null) {
                 getCurrentUser()
             }
             $('#message').empty();
             clearTimeouts()
             $.ajax( 'api/elements/' + category + '/' + name )
-            .done(function(response) {
+            .done(function(item) {
                 $('#main-content').empty();
-                if (response.length != 1) {
+                if (item.detail == "Not Found.") {
                         $('#main-content').append('<p>Oops! There was an error!</p>');
                 } else {
-                        item = response[0];
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
@@ -312,12 +341,12 @@ $(document).ready(function(){
                                 if (typeof field !== 'object' && item[field] !== null) {
                                     $('#main-content > .card').append('\
                                     <div class="card-block" id="' + category + '-' + field_name + '-' + name + '">\
-                                    <h4 class="card-title">' + field_name.replaceAll("_", " ") + '</h4>\
+                                    <div class="jumbotron card-title-detail">' + field_name.replaceAll("_", " ") + '</div>\
                                     <p class="card-text">' + item[field] + '</p></div>')
                                 } else if (typeof field === 'object' && item[field_name] !== null) {
                                     $('#main-content > .card').append('\
                                         <div class="card-block" id="' + category + '-' + field_name + '-' + name + '">\
-                                        <h4 class="card-title">' + field_name.replaceAll("_", " ") + '</h4></div>')
+                                        <div class="jumbotron card-title-detail">' + field_name.replaceAll("_", " ") + '</div></div>')
                                         field[field_name].forEach(function(subfield) {
                                             $('#' + category + '-' + field_name + '-' + name).append('\
                                                 <h6 class="card-subtitle text-muted">' + subfield.replaceAll("_", " ") + '</h6>\
@@ -358,6 +387,12 @@ $(document).ready(function(){
 
 
     function goAddDetail(category) {
+        if (!category_nav) {
+            populateCategoryNav();
+        }
+        if (current_user == null) {
+            getCurrentUser()
+        }
         $('#message').empty();
         clearTimeouts()
         $.ajax({ url : 'api/elements/' + category ,
@@ -459,7 +494,12 @@ $(document).ready(function(){
 
 
     function goEditDetail(category, id) {
-        // categoriesNavBar()
+        if (!category_nav) {
+            populateCategoryNav();
+        }
+        if (current_user == null) {
+            getCurrentUser()
+        }
         $('#message').empty();
         clearTimeouts();
         var category_url = category.replaceAll("-", "");
