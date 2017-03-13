@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, viewsets
 from .models import Category, Element
-from .serializers import CategorySerializer, ElementSerializer
+from .serializers import CategorySerializer, ElementSerializer, AllElementsSerializer
 from .serializers import UserSerializer
 from django.contrib.auth.models import User
 from rest_framework.response import Response
@@ -46,9 +46,14 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         return obj
 
 
+class AllElementsList(generics.ListCreateAPIView):
+    queryset = Element.objects.all()
+    serializer_class = AllElementsSerializer
+
+
 class ElementList(generics.ListCreateAPIView):
     queryset = Element.objects.all()
-    serializer_class = ElementSerializer
+    serializer_class = AllElementsSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -76,7 +81,6 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.DjangoObjectPermissions,)
     queryset = Element.objects.all()
     serializer_class = ElementSerializer
-    lookup_field = 'name__iexact'
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -92,6 +96,7 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
                 serializer_data['summary'] = reviewed[0].field_dict.get('summary')
                 serializer_data['description'] = reviewed[0].field_dict.get('description')
                 # data['img'] = reviewed[0].field_dict.get('img', 'pictures/kingdoms/2017/03/07/large.jpg')
+                serializer_data['final'] = reviewed[0].field_dict.get('final')
                 serializer_data['old_version'] = True
         return Response(serializer_data)
 
@@ -102,7 +107,6 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         self.kwargs['category'] = self.kwargs['category'].replace('-', ' ')
-        self.kwargs['name__iexact'] = self.kwargs['name__iexact'].replace('-', ' ')
         obj = super(ElementDetail, self).get_object()
         return obj
 

@@ -5,9 +5,9 @@ from reversion.admin import VersionAdmin
 from .models import Category, Element
 
 @admin.register(Category)
-class YourModelAdmin(VersionAdmin):
+class CategoryAdmin(VersionAdmin):
     pass
 
 @admin.register(Element)
-class YourModelAdmin(VersionAdmin):
+class ElementAdmin(VersionAdmin):
     pass

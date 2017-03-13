@@ -66,10 +66,6 @@ class ElementSerializer(serializers.Serializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     final = serializers.BooleanField(default=False)
 
-    class Meta:
-
-        lookup_field = 'name__iexact'
-
     def create(self, validated_data):
 
         element = Element.objects.create(**validated_data)
@@ -83,7 +79,6 @@ class ElementSerializer(serializers.Serializer):
         instance.summary = validated_data.get('summary', instance.summary)
         instance.description = validated_data.get('description', instance.description)
         instance.final = False
-        instance.category_id = validated_data.get('category', instance.category)
         instance.summary_image = validated_data.get('summary_image', instance.summary_image)
         instance.save()
         return instance
@@ -112,4 +107,22 @@ class CategorySerializer(serializers.Serializer):
         instance.img = validated_data.get('img', instance.img)
         instance.save()
         return instance
+
+
+class CategoryNameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = ('name',)
+        read_only_fields = ('name',)
+
+
+class AllElementsSerializer(serializers.ModelSerializer):
+    category = CategoryNameSerializer()
+    class Meta:
+        model = Element
+        fields = ('id','name', 'category')
+        read_only_fields = ('id','name','category')
+
+
 
