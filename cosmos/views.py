@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from reversion.models import Version
+from django.db.models.functions import Length
 import inflection
 
 
@@ -47,13 +48,13 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AllElementsList(generics.ListCreateAPIView):
-    queryset = Element.objects.all()
+    queryset = Element.objects.all().order_by(Length('name').desc())
     serializer_class = AllElementsSerializer
 
 
 class ElementList(generics.ListCreateAPIView):
     queryset = Element.objects.all()
-    serializer_class = AllElementsSerializer
+    serializer_class = ElementSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

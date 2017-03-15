@@ -29,7 +29,7 @@ var USE_TEMPLATES = true;
 var fields_shown = ["name", "summary", "description"]
 var summary_image_edit = true;
 var active_inputs = 0;
-var links = {};
+var links = [];
 
 
 $(document).ready(function(){
@@ -65,74 +65,78 @@ $(document).ready(function(){
     });
 
     function getCurrentUser() {
-        $.ajax({
-            url: 'api/currentuser',
-            type: 'GET'
-        }).fail(function(response) {
-            console.log('Couldn\'t obtain current user\'s info');
-            return null;
-        })
-          .done(function(user) {
-                current_user = user;
-                $('#login-show').remove();
-                $('#navbarColor01').append('<ul class="navbar-nav">\
-                    <li class="nav-item dropdown">\
-                        <a class="nav-link dropdown-toggle" id="loggedin" data-toggle="dropdown" href="#">' + current_user.username +'</a>\
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loggedin">\
-                            <a class="dropdown-item" id ="signout_link" href="#/account/signout">Sign out</a>\
-                            <a class="dropdown-item" id ="change_pass_link" href="#">Change Password</a>\
-                        </div>\
-                    </li>\
-                    </ul>');
-            })   
+        if (current_user == null) {
+
+            $.ajax({
+                url: 'api/currentuser',
+                type: 'GET'
+            }).fail(function(response) {
+                console.log('Couldn\'t obtain current user\'s info');
+                return null;
+            })
+            .done(function(user) {
+                    current_user = user;
+                    $('#login-show').remove();
+                    $('#navbarColor01').append('<ul class="navbar-nav">\
+                        <li class="nav-item dropdown">\
+                            <a class="nav-link dropdown-toggle" id="loggedin" data-toggle="dropdown" href="#">' + current_user.username +'</a>\
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loggedin">\
+                                <a class="dropdown-item" id ="signout_link" href="#/account/signout">Sign out</a>\
+                                <a class="dropdown-item" id ="change_pass_link" href="#">Change Password</a>\
+                            </div>\
+                        </li>\
+                        </ul>');
+                })  
+        } 
     };
 
-    function getElementLinks() {
-        $.ajax({
-            url: 'api/allelements',
-            type: 'GET'
-        }).fail(function(response) {
-            console.log('Couldn\'t obtain elements');
-            return null;
-        })
-          .done(function(elements) {
-              elements.forEach(function(element){
-                links[element.name] = {'id' : element.id, 'category' : element.category.name}
-                
-              });
-        });
+    function makeLinks() {
+        if (links.length == 0) {
+            $.ajax({
+                url: 'api/allelements',
+                type: 'GET'
+            }).fail(function(response) {
+                console.log('Couldn\'t obtain elements');
+                return null;
+            })
+            .done(function(elements) {
+                    links = elements;
+                    replaceLinks();
+            });
+        }
+
+        replaceLinks();
     };
     
-    function makeLinks() {
-        $.each(links, function(key, value) {
-            // $('*:contains("' + key + '")').text().replace(key, '<a href ="#/' + 
-            //                                                     value.category +'/show/' + 
-            //                                                     value.id + '">' + key + '</a>');
-            //store it ("this" is gonna become the dom element in the next function)
-            $('.card-text').each(
+    function replaceLinks() {
+        $.each(links, function(index, link) {
+            $('.card-text:not(a)').each(
                 function() {
-                    //if it's exactly the same
-                    if ($(this).text() === key) {
-                        //do your magic tricks
-                        $(this).html('<a href="#/' + value.category +'/show/' + value.id + '">' + key + '</a>');
-                    }
-                }
-            );
+                    var string = $(this).html();
+                    var theRegex = new RegExp(link.name, 'gi'); 
+                    console.log('here1: ' + theRegex)
+                    $(this).html(string.replace(theRegex, function (word) { 
+                                                                return '<a href="#/'+ link['category']['name'] + '/show/' +
+                                                                link.id +'">'+ link.name + '</a>'
+                                                            }));
+            });
         });
     }
 
     function populateCategoryNav(){
-        $.ajax( 'api/categories' )
-            .done(function(data) {
-                $('#categories-nav-list').empty();
-                data.forEach(function(item) {
-                            var name_attr = item.name.replace(" ", "-").toLowerCase();
-                            $('#categories-nav-list').append('\
-                                <a class="dropdown-item" id ="'+ name_attr + '-nav-link" href="#/'+ name_attr +'">' + item.name + '</a>\
-                            ')
-                        })
-            });
-        category_nav = true;
+        if (!category_nav) {
+            $.ajax( 'api/categories' )
+                .done(function(data) {
+                    $('#categories-nav-list').empty();
+                    data.forEach(function(item) {
+                                var name_attr = item.name.replace(" ", "-").toLowerCase();
+                                $('#categories-nav-list').append('\
+                                    <a class="dropdown-item" id ="'+ name_attr + '-nav-link" href="#/'+ name_attr +'">' + item.name + '</a>\
+                                ')
+                            })
+                });
+            category_nav = true;
+        }
     }
 
     $('body').on('click', '#login-show', function() {
@@ -235,16 +239,10 @@ $(document).ready(function(){
     hasher.changed.add(parseHash); //parse hash changes
     hasher.init(); //start listening for history change
 
-    getElementLinks();
-    makeLinks();
-
     function goHome() {
-        makeLinks();
         $('#message').empty();
         clearTimeouts()
-        if (current_user == null) {
-            getCurrentUser()
-        }
+        getCurrentUser()
         $.ajax( 'api/categories' )
             .done(function(data) {
             $('#main-content').empty();
@@ -274,18 +272,14 @@ $(document).ready(function(){
 
                         category_nav = true;
                     }
+                    makeLinks();
             });
     };
 
 
     function goCategory(category) {
-        makeLinks();
-        if (current_user == null) {
-            getCurrentUser()
-        }
-        if (!category_nav) {
-            populateCategoryNav();
-        }
+        getCurrentUser();
+        populateCategoryNav();
         $('#message').empty();
         clearTimeouts()
         $.ajax('api/elements/' + category)
@@ -335,23 +329,18 @@ $(document).ready(function(){
                     </div>\
             </div>')
         }
+        makeLinks();
         setTimeout(function() {goCategory(category)}, TIMEOUT);
         })
     }
 
 
     function goDetail(category, id, keepMessage) {
-            makeLinks();
-            if (!category_nav) {
-                populateCategoryNav();
-            }
-            if (current_user == null) {
-                getCurrentUser()
-            }
+            populateCategoryNav();
+            getCurrentUser();
             if (!keepMessage) {
                 $('#message').empty();
             }
-            
             clearTimeouts()
             $.ajax( 'api/elements/' + category + '/' + id )
             .done(function(item) {
@@ -422,6 +411,8 @@ $(document).ready(function(){
                                         doEditDetail(category, id);
                                     })
                             }
+
+                            makeLinks();
 
                         } else {
                             $('#main-content').append('<p>This item is not finalized yet</p>');
@@ -518,6 +509,7 @@ $(document).ready(function(){
                                         $('#' + field + '-editable > .card-text').append(content_val);
                                         active_inputs -= 1
                                         checkNumberOfInputs(category, id);
+                                        makeLinks();
                                     })
 
 
@@ -552,7 +544,7 @@ $(document).ready(function(){
         }
 
         tinymce.triggerSave()
-        console.log('ehehe1')
+
         var formData = new FormData($('#' + category +'_' + id +'_edit_form')[0])
         
         $.ajax({
@@ -610,13 +602,8 @@ $(document).ready(function(){
 
 
     function goAddDetail(category) {
-
-        if (!category_nav) {
-            populateCategoryNav();
-        }
-        if (current_user == null) {
-            getCurrentUser()
-        }
+        populateCategoryNav();
+        getCurrentUser();
         $('#message').empty();
         clearTimeouts()
         $.ajax({ url : 'api/elements/' + category ,
@@ -800,7 +787,8 @@ $(document).ready(function(){
           .done(function() {
                 csrftoken = getCookie('csrftoken');
                 $('#LoginModal').modal('hide');
-                getCurrentUser()
+                //getCurrentUser()
+                window.location.reload();
             })     
     };
 
