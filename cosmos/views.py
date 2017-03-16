@@ -9,7 +9,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from reversion.models import Version
 from django.db.models.functions import Length
-import inflection
+from rest_framework.exceptions import NotFound
+from .permissions import IsOwnerOrReadOnly
+# #import inflection
+
+from django.http import JsonResponse
+
+
+def custom404(request):
+    return JsonResponse({
+        'status_code': 404,
+        'error': 'The resource was not found'
+    })
 
 
 moderator_group_name = 'Moderators'
@@ -31,18 +42,20 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 class CategoryList(generics.ListCreateAPIView):
+    permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'name__iexact'
 
 
     def get_object(self):
-        self.kwargs['name__iexact'] = inflection.pluralize(self.kwargs['name__iexact'].replace('-', ' '))
+        self.kwargs['name__iexact'] = self.kwargs['name__iexact'].replace('-', ' ')
         obj = super(CategoryDetail, self).get_object()
         return obj
 
@@ -53,6 +66,7 @@ class AllElementsList(generics.ListCreateAPIView):
 
 
 class ElementList(generics.ListCreateAPIView):
+    permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly,)
     queryset = Element.objects.all()
     serializer_class = ElementSerializer
 
@@ -69,19 +83,23 @@ class ElementList(generics.ListCreateAPIView):
                     data['name'] = reviewed[0].field_dict.get('name')
                     data['summary'] = reviewed[0].field_dict.get('summary')
                     data['description'] = reviewed[0].field_dict.get('description')
-                    #data['img'] = reviewed[0].field_dict.get('img', 'pictures/kingdoms/2017/03/07/large.jpg')
+                    #print(reviewed[0].field_dict.get('summary_image'))
+                    #data['summary_image'] = reviewed[0].field_dict.get('summary_image')
                     data['final'] = reviewed[0].field_dict.get('final')
         return Response(serializer.data)
 
     def get_queryset(self):
         #if category name is more than one words, it will come in word1-word2 format
         category = self.kwargs['category'].replace('-', ' ')
+        if Category.objects.filter(name__iexact=category).exists() == 0:
+            raise NotFound('Category wasn\'t found')
         return Element.objects.filter(category__name__iexact=category)
 
 class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.DjangoObjectPermissions,)
+    permission_classes = (IsOwnerOrReadOnly,)
     queryset = Element.objects.all()
     serializer_class = ElementSerializer
+
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -96,7 +114,7 @@ class ElementDetail(generics.RetrieveUpdateDestroyAPIView):
                 serializer_data['name'] = reviewed[0].field_dict.get('name')
                 serializer_data['summary'] = reviewed[0].field_dict.get('summary')
                 serializer_data['description'] = reviewed[0].field_dict.get('description')
-                # data['img'] = reviewed[0].field_dict.get('img', 'pictures/kingdoms/2017/03/07/large.jpg')
+                #serializer_data['summary_image'] = reviewed[0].field_dict.get('summary_image', 'pictures/kingdoms/2017/03/07/large.jpg')
                 serializer_data['final'] = reviewed[0].field_dict.get('final')
                 serializer_data['old_version'] = True
         return Response(serializer_data)

@@ -175,3 +175,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #Auth stuff
 
 OLD_PASSWORD_FIELD_ENABLED = True
+
+ALLOWED_HOSTS = ['*']
+

@@ -11,3 +11,11 @@
 .card-title-detail {
     padding: 1rem 1rem;
 }
+
+.jumbotron {
+    border-radius: 0px;
+}
+
+.card-text {
+    padding: 0.5rem 0.5rem;
+}

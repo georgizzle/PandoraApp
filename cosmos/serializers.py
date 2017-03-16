@@ -14,7 +14,6 @@ def assign_object_perms(modelname, serializer, instance):
     for group in user.groups.all():
         if group.name != moderator_group_name:
             assign_perm('change_{}'.format(modelname), group, instance)
-            assign_perm('add_{}'.format(modelname), group, instance)
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -62,7 +61,7 @@ class ElementSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=30)
     summary = serializers.CharField(allow_blank=True, allow_null=True)
     description = serializers.CharField(allow_blank=True, allow_null=True)
-    summary_image = serializers.ImageField(allow_null=True,  use_url=False)
+    summary_image = serializers.ImageField(allow_null=True,  use_url=False, allow_empty_file=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     final = serializers.BooleanField(default=False)
 
@@ -90,7 +89,7 @@ class CategorySerializer(serializers.Serializer):
     summary = serializers.CharField(allow_blank=True, allow_null=True)
     template = serializers.CharField(allow_blank=True, allow_null=True)
     cr_date = serializers.DateTimeField()
-    summary_image = serializers.ImageField(allow_null=True, use_url=False)
+    summary_image = serializers.ImageField(allow_null=True, use_url=False, allow_empty_file=True)
 
     class Meta:
 
@@ -104,7 +103,7 @@ class CategorySerializer(serializers.Serializer):
 
         instance.name = validated_data.get('name', instance.name)
         instance.summary = validated_data.get('summary', instance.summary)
-        instance.img = validated_data.get('img', instance.img)
+        instance.summary_image = validated_data.get('summary_image', instance.summary_image)
         instance.save()
         return instance
 

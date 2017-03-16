@@ -11,7 +11,7 @@ class Category(models.Model):
     template = tinymce_models.HTMLField(blank=True, null=True) # The template of the description
     cr_date = models.DateTimeField(auto_now_add=True) # Time and date of creation, defaults to current time
     related = models.ManyToManyField('self',symmetrical=False, blank=True, through='CategoryRelationship', related_name="related_set")
-    summary_image = models.ImageField(upload_to='pictures/' , blank=True) # The link for the image thumbnail
+    summary_image = models.ImageField(upload_to='pictures/%Y/%m/%d' , blank=True, default='pictures/Erevos_world_map.png') # The link for the image thumbnail
 
     def __str__(self):
         return 'Category: ' + self.name
@@ -31,7 +31,7 @@ class Element(models.Model):
     related = models.ManyToManyField('self', symmetrical=False, blank=True, through='ElementRelationship',
                                      related_name="related_set")
     final = models.BooleanField(default=False)
-    summary_image = models.ImageField(upload_to='pictures/', blank=True)
+    summary_image = models.ImageField(upload_to='pictures/%Y/%m/%d', blank=True, default='pictures/Erevos_world_map.png')
 
 
     def __str__(self):

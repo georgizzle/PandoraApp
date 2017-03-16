@@ -114,7 +114,6 @@ $(document).ready(function(){
                 function() {
                     var string = $(this).html();
                     var theRegex = new RegExp(link.name, 'gi'); 
-                    console.log('here1: ' + theRegex)
                     $(this).html(string.replace(theRegex, function (word) { 
                                                                 return '<a href="#/'+ link['category']['name'] + '/show/' +
                                                                 link.id +'">'+ link.name + '</a>'
@@ -243,6 +242,7 @@ $(document).ready(function(){
         $('#message').empty();
         clearTimeouts()
         getCurrentUser()
+        makeLinks()
         $.ajax( 'api/categories' )
             .done(function(data) {
             $('#main-content').empty();
@@ -293,7 +293,7 @@ $(document).ready(function(){
                                     <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
                                     <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
-                                    <p class="card-text">' + item.summary + '</p>\
+                                    <div class="card-text">' + item.summary + '</div>\
                                     </div>\
                                     <a href="#/'+ category +'/show/'+ item.id +'" class="item-detail" id= "\
                                     ' + category + '_' + item.name.toLowerCase().replaceAll(" ", "-") +'">\
@@ -331,11 +331,22 @@ $(document).ready(function(){
         }
         makeLinks();
         setTimeout(function() {goCategory(category)}, TIMEOUT);
-        })
+        }).fail(function(response) {
+                $('#message').append('\
+                    <div class="alert alert-dismissible alert-danger">\
+                        <button type="button" class="close" data-dismiss="alert">×</button>\
+                        <strong>Something went wrong: </strong>\
+                    </div>');
+                    Object.keys(response.responseJSON).forEach(function(key,index) {
+                        $('#message>div').append('<p>' + key + ' : ' + response.responseJSON[key] + '</p>');
+                    });
+        });
+
     }
 
 
     function goDetail(category, id, keepMessage) {
+            makeLinks()
             populateCategoryNav();
             getCurrentUser();
             if (!keepMessage) {
@@ -415,7 +426,11 @@ $(document).ready(function(){
                             makeLinks();
 
                         } else {
-                            $('#main-content').append('<p>This item is not finalized yet</p>');
+                            $('#message').append('\
+                                <div class="alert alert-dismissible alert-danger">\
+                                    <button type="button" class="close" data-dismiss="alert">×</button>\
+                                    This element is not finalized yet\
+                                </div>')
                         }
                 }
             //we set timeout only if the page is not editable os it won't mess editing
@@ -519,8 +534,10 @@ $(document).ready(function(){
                     $('#message').append('\
                         <div class="alert alert-dismissible alert-danger">\
                             <button type="button" class="close" data-dismiss="alert">×</button>\
-                            You are not authorized to edit this field\
+                            You are not authorized to edit this element\
                         </div>')
+
+                    $("html, body").animate({ scrollTop: 0 }, 'slow');
                 }
 
                 checkNumberOfInputs(category, id);
