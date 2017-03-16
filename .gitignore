@@ -50,5 +50,6 @@ Temporary Items
 media
 cosmos/migrations
 cosmos/static/cosmos/node_modules
-cosmos/__pycache__
-PandoraApp/__pycache__
+venv
+*.pyc
+.env
