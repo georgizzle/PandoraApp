@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-
+from django.http import HttpResponseRedirect
 urlpatterns = [
+    url(r'^$', lambda r: HttpResponseRedirect('cosmos/')),
     url(r'^cosmos/', include('cosmos.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^tinymce/', include('tinymce.urls')),
