@@ -159,7 +159,7 @@ STATIC_URL = '/static/'
 
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = config('MEDIA_URL')
 
 
 TINYMCE_DEFAULT_CONFIG = {
@@ -176,13 +176,9 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.spl
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-if config('ON_HEROKU', cast=bool):
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('S3_BUCKET_NAME')
 
-    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = config('S3_BUCKET_NAME')
-
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
-    MEDIA_URL = 'http://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
+DEFAULT_FILE_STORAGE = config('DEFAULT_FILE_STORAGE')
 
