@@ -1,1 +1,1 @@
-web: gunicorn cosmos.wsgi --log-file -
+web: gunicorn wsgi --log-file -
