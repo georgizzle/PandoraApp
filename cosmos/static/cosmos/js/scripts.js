@@ -19,7 +19,7 @@ require('tinymce/plugins/autoresize/plugin')
 require('tinymce/plugins/image/plugin')
 
 
-var TIMEOUT = 30000;
+var TIMEOUT = 120000;
 var SITE_URL = "http://localhost:8000/cosmos";
 var DEFAULT_PIC = "pictures/Erevos_world_map.png";
 var MODERATOR_GROUP = "Moderators"
