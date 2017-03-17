@@ -251,7 +251,7 @@ $(document).ready(function(){
              $('#main-content').append('<p>The are no data (Yet)</p>');
             } else {
                 data.forEach(function(item) {
-                            var name_attr = item.name.replace(" ", "-").toLowerCase();
+                            var name_attr = item.name.replaceAll(" ", "-").toLowerCase();
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
                                   <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
@@ -393,7 +393,7 @@ $(document).ready(function(){
                                         $(this).find(">:first-child").append('<a\
                                         class="item-detail_edit float-right" href="javascript:void(0);" id= "edit_' + 
                                         category + '_' + id + '_' +
-                                        $(this).attr('id').split('-')[0].replace('_' , '-') +'">\
+                                        $(this).attr('id').split('-')[0].replaceAll('_' , '-') +'">\
                                         edit</a>')
                                     }
                                 });
@@ -446,7 +446,7 @@ $(document).ready(function(){
         clearTimeouts();
         var category = element.attr('id').split('_')[1]
         var id = element.attr('id').split('_')[2]
-        var field = element.attr('id').split('_')[3].replace("-", "_")
+        var field = element.attr('id').split('_')[3].replaceAll("-", "_")
 
         $.ajax({ url : 'api/elements/' + category + '/' + id,
                   method: 'OPTIONS'
@@ -518,7 +518,7 @@ $(document).ready(function(){
                                         e.preventDefault();
                                         $(this).remove();
                                         //show edit button again
-                                        $('#edit_' + category + '_' + id + '_' + field.replace("_", "-")).show();
+                                        $('#edit_' + category + '_' + id + '_' + field.replaceAll("_", "-")).show();
                                         //remove form element
                                         $('#' + field ).parent().remove();
                                         $('#' + field + '-editable > .card-text').append(content_val);
