@@ -1,1 +1,1 @@
-web: gunicorn wsgi --log-file -
+web: gunicorn PandoraApp.wsgi --log-file -
