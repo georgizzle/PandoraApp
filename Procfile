@@ -1,1 +1,1 @@
-web: gunicorn erevos.wsgi --log-file -
+web: gunicorn cosmos.wsgi --log-file -
