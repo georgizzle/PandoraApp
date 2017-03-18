@@ -16,9 +16,12 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.http import HttpResponseRedirect
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     url(r'^$', lambda r: HttpResponseRedirect('cosmos/')),
     url(r'^cosmos/', include('cosmos.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^tinymce/', include('tinymce.urls')),
-]
+] + static(settings.MEDIA_URL,)

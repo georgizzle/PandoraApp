@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'rest_auth.registration',
-    'guardian',
     'storages',
+    'guardian',
 ]
 
 SITE_ID = 1
