@@ -439,7 +439,7 @@ $(document).ready(function(){
                 }
             //we set timeout only if the page is not editable os it won't mess editing
             if (!canEdit) {
-                setTimeout(function() {goDetail(category, name)}, TIMEOUT);
+                setTimeout(function() {goDetail(category, id, keepMessage)}, TIMEOUT);
             }
         });
     };
