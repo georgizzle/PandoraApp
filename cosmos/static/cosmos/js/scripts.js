@@ -30,6 +30,7 @@ var fields_shown = ["name", "summary", "description"]
 var summary_image_edit = true;
 var active_inputs = 0;
 var links = [];
+var media_url = 'http://pandora-erevos-media.s3.amazonaws.com/'
 
 
 $(document).ready(function(){
@@ -254,7 +255,7 @@ $(document).ready(function(){
                             var name_attr = item.name.replaceAll(" ", "-").toLowerCase();
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                  <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
+                                  <img class="card-img-top img-responsive" src="' + media_url + safe_get_img(item.summary_image) + '" alt="Card image cap">\
                                   <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
                                     <p class="card-text">' + item.summary + '</p>\
@@ -290,7 +291,7 @@ $(document).ready(function(){
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                    <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
+                                    <img class="card-img-top img-responsive" src="' + media_url+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
                                     <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
                                     <div class="card-text">' + item.summary + '</div>\
@@ -362,7 +363,7 @@ $(document).ready(function(){
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                <img class="card-img-top img-responsive" src="media/'+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
+                                <img class="card-img-top img-responsive" src="' + media_url + safe_get_img(item.summary_image) + '" alt="Card image cap">\
                             </div>');
                             Object.keys(item).forEach(function(key,index) {
                                 if (isInArray(key, fields_shown) ) {
