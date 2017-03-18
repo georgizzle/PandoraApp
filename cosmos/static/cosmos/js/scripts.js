@@ -21,7 +21,7 @@ require('tinymce/plugins/lists/plugin')
 require('tinymce/plugins/fullscreen/plugin')
 
 
-var TIMEOUT = 15000;
+var TIMEOUT = 120000;
 var SITE_URL = "https://erevos.herokuapp.com";
 var DEFAULT_PIC = "pictures/Erevos_world_map.png";
 var MODERATOR_GROUP = "Moderators"
@@ -32,7 +32,7 @@ var fields_shown = ["name", "summary", "description"]
 var summary_image_edit = true;
 var active_inputs = 0;
 var links = [];
-var media_url = '/media/'
+var media_url = 'http://pandora-erevos-media.s3.amazonaws.com/'
 
 
 $(document).ready(function(){
