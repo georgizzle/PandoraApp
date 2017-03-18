@@ -17,9 +17,11 @@ require('tinymce/plugins/paste/plugin')
 require('tinymce/plugins/link/plugin')
 require('tinymce/plugins/autoresize/plugin')
 require('tinymce/plugins/image/plugin')
+require('tinymce/plugins/lists/plugin')
+require('tinymce/plugins/fullscreen/plugin')
 
 
-var TIMEOUT = 120000;
+var TIMEOUT = 15000;
 var SITE_URL = "https://erevos.herokuapp.com";
 var DEFAULT_PIC = "pictures/Erevos_world_map.png";
 var MODERATOR_GROUP = "Moderators"
@@ -30,7 +32,7 @@ var fields_shown = ["name", "summary", "description"]
 var summary_image_edit = true;
 var active_inputs = 0;
 var links = [];
-var media_url = 'http://pandora-erevos-media.s3.amazonaws.com/'
+var media_url = '/media/'
 
 
 $(document).ready(function(){
@@ -240,7 +242,8 @@ $(document).ready(function(){
     hasher.init(); //start listening for history change
 
     function goHome() {
-        $('#message').empty();
+        // when redirected after addition of element message should not be emptied.
+        //$('#message').empty();
         clearTimeouts()
         getCurrentUser()
         makeLinks()
@@ -291,7 +294,7 @@ $(document).ready(function(){
                         if (item.final) {
                             $('#main-content').append('\
                                 <div class="card" style="width: 20rem;">\
-                                    <img class="card-img-top img-responsive" src="' + media_url+ safe_get_img(item.summary_image) + '" alt="Card image cap">\
+                                    <img class="card-img-top img-responsive" src="' + media_url + safe_get_img(item.summary_image) + '" alt="Card image cap">\
                                     <div class="card-block">\
                                     <h4 class="card-title">' + item.name + '</h4>\
                                     <div class="card-text">' + item.summary + '</div>\
@@ -492,7 +495,7 @@ $(document).ready(function(){
                                 tinymce.init({
                                             selector: '#' + field,
                                             theme: "modern",
-                                            plugins: ['paste', 'link', 'autoresize', 'image'],
+                                            plugins: ['paste', 'link', 'autoresize', 'image','fullscreen','lists'],
                                             image_list: [
                                                 {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
                                                 {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
@@ -688,7 +691,7 @@ $(document).ready(function(){
                         tinymce.init({
                             selector: ".textarea-field",
                             theme: "modern",
-                            plugins: ['paste', 'link', 'autoresize', 'image'],
+                            plugins: ['paste', 'link', 'autoresize', 'image', 'fullscreen', 'lists'],
                             image_list: [
                                 {title: 'My image 1', value: 'http://www.tinymce.com/my1.gif'},
                                 {title: 'My image 2', value: 'http://www.moxiecode.com/my2.gif'}
@@ -781,6 +784,7 @@ $(document).ready(function(){
 
             //go to the top of the page
             $("html, body").animate({ scrollTop: 0 }, 'slow');
+            hasher.setHash("#/home")
     }
 
 
